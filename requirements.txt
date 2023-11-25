@@ -1,0 +1,2 @@
+請參照build_environment資料夾中yml檔案的內容
+使用script: create_env.sh建立環境

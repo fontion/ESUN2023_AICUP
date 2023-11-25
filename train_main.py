@@ -18,8 +18,8 @@ from utils import model_args
 from utils import print_input
 from utils import dump_opt_thres
 from utils import evaluation
-from shap_importance import catboost_shap
-from shap_importance import xgb_shap as xgboost_shap
+from codes.shap_importance import catboost_shap
+from codes.shap_importance import xgb_shap as xgboost_shap
 
 def parse_args():
     parser = ArgumentParser()

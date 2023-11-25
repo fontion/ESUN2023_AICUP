@@ -1,17 +1,31 @@
 # 建立環境
-1. 請先安裝miniconda
+1. 請先安裝[miniconda](https://docs.conda.io/projects/miniconda/en/latest/)
 2. 使用conda建立名為"ESUN"的environment
 ```
 cd build_environment
 source create_env.sh
 ```
 
-# 資料前處理
+# 資料結構
 資料夾"dataset_1st"為初賽第一階段釋出的資料，裡面應包含"training.csv"與"public_processed.csv"兩個檔案
 資料夾"dataset_2nd"為初賽第二階段釋出的資料，裡面應包含"public.csv"與"private_1_processed.csv"兩個檔案
 根目錄下需放置檔案"31_範例繳交檔案.csv"
 ```
-cd ../codes
+.
+├ dataset_1st
+│ ├ public_processed.csv
+│ └ training.csv
+│
+├ dataset_2nd
+│ ├ private_1_processed.csv
+│ └ public.csv
+│
+└ 31_範例繳交檔案.csv
+```
+
+# 資料前處理
+```
+cd ../Preprocess
 python preprocess.py dataset_1st
 python preprocess.py dataset_2nd
 ```
