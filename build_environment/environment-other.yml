@@ -1,0 +1,31 @@
+name: ESUN
+channels:
+  - conda-forge
+  - anaconda
+dependencies:
+  - mkl-service
+  - ipython
+  - jupyterlab
+  - notebook
+  - nodejs
+  - mpld3
+  - catboost=1.2.2
+  - lightgbm
+  - skorch
+  - pandas
+  - nltk
+  - shap
+  - imbalanced-learn
+  - seaborn
+  - intel-openmp
+  - cupy
+  - xlrd
+  - openpyxl
+  - odfpy
+  - tqdm
+  - flask[async]
+  - psutil
+  - py-cpuinfo
+  - pip
+  - pip:
+    - xgboost

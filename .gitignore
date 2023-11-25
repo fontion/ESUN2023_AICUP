@@ -1,0 +1,38 @@
+.ipynb_checkpoints/
+.Trash-0/
+.vscode/
+catboost_info/
+CH/
+codes/__pycache__/
+codes/.ipynb_checkpoints/
+codes/catboost_info/
+scripts/
+.lftpignore
+.rsyncignore
+cascade_eval.py
+cascade1.py
+code2twcc.sh
+embedding.py
+nocontri_features.py
+opt_thres.py
+positive_rate_per_usage.py
+shap_importance.sh
+shrink_dataset.py
+test_embedding.py
+dataset_1st/temp
+dataset_1st/*.txt
+dataset_1st/*.joblib
+dataset_1st/*.csv
+dataset_1st/positive_rate.xlsx
+dataset_2nd/temp
+dataset_2nd/*.joblib
+dataset_2nd/*.csv
+References/
+submit/
+train_test/
+31_dataset_1st_training_public testing.zip
+31_dataset_2nd_public answer_private testing.zip
+31_範例繳交檔案.csv
+31_資料欄位說明.xlsx
+ESun Slack Link.txt
+ESun Slack Link_V2.txt

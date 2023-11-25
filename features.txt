@@ -1,0 +1,90 @@
+新增features:
+ - chid 顧客ID (若此人過去沒有被盜刷的記錄，設為'clear'，有盜刷記錄則保留本來代碼)
+ - cano 交易卡號 (若此卡過去沒有被盜刷的記錄，設為'clear'，有盜刷記錄則保留本來代碼)
+ - loctm 改為category feature
+ - discount 交易金額(conam)-實付金額(flam1)
+ - n_card 此人持有信用卡數量(若過去沒有消費設為1)
+ - n_person 此卡關聯幾個顧客ID(若過去沒有消費設為1)
+ - Pusage 此人累積消費次數(不含預測這次)
+ - Cusage 此卡累積消費次數(不含預測這次)
+ - Pduration 此人距上次消費時間(若第一次消費則為100)
+ - Cduration 此卡距上次消費時間(若第一次消費則為100)
+ - Pinterval 此人平均多久消費一次(過去消費次數1次以下設為100)
+ - Cinterval 此卡平均多久消費一次(過去消費次數1次以下設為100)
+ - Pfraud_accu 此人累積被盜刷次數(若過去沒有消費設為0)
+ - Cfraud_accu 此卡累積被盜刷次數(若過去沒有消費設為0)
+ - Pfraud_last 此人前一次消費是否為盜刷(若過去沒有消費設為False)
+ - Cfraud_last 此卡前一次消費是否為盜刷(若過去沒有消費設為False)
+ - Pstocn_ratio_tw 此人過去在台灣刷卡佔所有刷卡記錄的比率(若過去沒有消費設為100)
+ - Cstocn_ratio_tw 此卡過去在台灣刷卡佔所有刷卡記錄的比率(若過去沒有消費設為100)
+ - Pstscd_abnormal 此人過去交易狀態異常的比率(若過去沒有消費設為0)
+ - Cstscd_abnormal 此卡過去交易狀態異常的比率(若過去沒有消費設為0)
+ - Pflam1_pvalue 實付金額(flam1)為此人過去消費常模的機率(1-sample independent t-test)(若過去沒有消費設為0)
+ - Cflam1_pvalue 實付金額(flam1)為此卡過去消費常模的機率(1-sample independent t-test)(若過去沒有消費設為0)
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+ - Pmaxval 此人歷史最高消費金額(台幣，若第一次消費則為0)
+ - Cmaxval 此卡歷史最高消費金額(台幣，若第一次消費則為0)
+ - Pavgval 此人歷史平均消費金額(台幣，若第一次消費則為0)
+ - Cavgval 此卡歷史平均消費金額(台幣，若第一次消費則為0)
+ - Pstdval 此人歷史消費金額標準差(台幣，若第一次消費則為0)
+ - Cstdval 此卡歷史消費金額標準差(台幣，若第一次消費則為0)
+ - Pflam1_newrcd 本次消費超過此人歷史最高消費金額(若第一次消費則為True，考量第一次消費就被盜刷的可能性不算低0.09)
+ - Cflam1_newrcd 本次消費超過此卡歷史最高消費金額(若第一次消費則為True，考量第一次消費就被盜刷的可能性不算低0.09)
+ - Pstocn_ratio 此人過去在該國別消費的比率
+ - Cstocn_ratio 此卡過去在該國別消費的比率
+ - Pscity_ratio 此人過去在該城市消費的比率
+ - Cscity_ratio 此卡過去在該城市消費的比率
+ - Pstocn_scope 此人累積不同刷卡國家數量
+ - Cstocn_scope 此卡累積不同刷卡國家數量
+ - Pscity_scope 此人累積不同刷卡城市數量
+ - Cscity_scope 此卡累積不同刷卡城市數量
+ - Ploctm_focus 此人過去消費最高的時段(若過去沒有消費設為空值)
+ - Cloctm_focus 此卡過去消費最高的時段(若過去沒有消費設為空值)
+ - Pcontp_mode 此人過去最頻繁的交易類別(若過去沒有消費設為空值)
+ - Ccontp_mode 此卡過去最頻繁的交易類別(若過去沒有消費設為空值)
+ - Petymd_mode 此人過去最頻繁的交易型態(若過去沒有消費設為空值)
+ - Cetymd_mode 此卡過去最頻繁的交易型態(若過去沒有消費設為空值)
+ - Pecfg_incidence 此人過去網路交易比率
+ - Cecfg_incidence 此卡過去網路交易比率
+ - Pinsfg_incidence 此人過去選分期繳費比率
+ - Cinsfg_incidence 此卡過去選分期繳費比率
+ - Povrlt_incidence 此人過去超額刷卡的比率
+ - Covrlt_incidence 此卡過去超額刷卡的比率
+ - Pflbmk_incidence 此人過去交易發生fallback的比率
+ - Cflbmk_incidence 此卡過去交易發生fallback的比率
+ - Phcefg_mode 此人過去最頻繁的支付型態(若過去沒有消費設為空值)
+ - Chcefg_mode 此卡過去最頻繁的支付型態(若過去沒有消費設為空值)
+ - Pcsmcu_TopN 所使用之貨幣是否為此人常用前7.5成的貨幣
+ - Ccsmcu_TopN 所使用之貨幣是否為此卡常用之top-3
+ - Pflg3dsmk_incidence 此人過去是否曾使用3D交易認證 (模型可從此值是否為0來判別)
+ - Cflg3dsmk_incidence 此卡過去是否曾使用3D交易認證 (模型可從此值是否為0來判別)
+ - Plabel_incidence 此人過去被盜刷的比率
+ - Clabel_incidence 此卡過去被盜刷的比率
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+類別型feature，從歷史記錄可以衍生出以下6種features:
+ - mode 過去消費頻率最高的類別(若過去沒有消費設為空值)
+ - scope 過去曾出現的類別總數(若過去沒有消費設為0)
+ - focus 過去消費總金額最高的類別(若過去沒有消費設為空值)
+ - newcat 此次消費是否為過去沒有出現的類別(若過去沒有消費設為True)
+ - ratio 此次消費的類別在過去佔所有類別的比率(若此次為空值設為空值，若過去沒有消費設為0)
+ - TopN 此次消費是否為過去類別次數排名前75%的類別(若過去沒有消費設為False)
+ 
+數值型feature，從歷史記錄可以衍生出以下6種features (僅用於flam1):
+ - maxval 過去最大數值(若過去沒有消費設為0)
+ - minval 過去最小數值(若過去沒有消費設為0)
+ - avgval 過去平均數值(若過去沒有消費設為0)
+ - stdval 過去數值標準差(若過去消費1次以下設為0)
+ - newrcd 本次消費超越過去最大值(若過去沒有消費設為True)
+ - gt99ci 本次消費超越過去99%CI消費數值(若過去沒有消費設為True)
+ 
+布林型feature，從歷史記錄可以衍生出以下1種features:
+ - incidence 過去為True的比率(若過去沒有消費設為0)
+ 
+ 
+ 
+移除features:
+ - txkey 交易序號 (做為資料的index)
+ - locdt 授權日期 (使用days_from_start取代)
+ - flam1 實付金額(用discount取代)
+ 
