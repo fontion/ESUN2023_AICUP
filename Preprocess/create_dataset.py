@@ -1,3 +1,7 @@
+"""
+回顧過去的刷卡記錄, 產生訓練模型所需的所有features
+"""
+
 # Syntax
 #       python create_dataset.py [split_from_training/combine_training_and_public]
 import os
@@ -12,6 +16,9 @@ from datetime import datetime
 from preprocess import format_dtypeI
 
 def unique_vec(v:np.ndarray):
+    """
+    抓出已排序向量中unique element第一次出現的index
+    """
     lg_adj = v[1:]!=v[:-1]
     unqix = np.nonzero(np.r_[True, lg_adj])[0] # first appearance
     unqix = np.r_[unqix, v.size]
@@ -229,6 +236,9 @@ def unique_vec(v:np.ndarray):
 #     return df_addC, lg_inC
 
 def add_features_group(df_train, df_pred, gp, parallel=False):
+    """
+    回溯此人或此卡過去刷卡記錄, 產生新的features
+    """
     if gp=='P':
         print('Processing chid records...')
         ID = 'chid'
@@ -398,6 +408,9 @@ def add_features_group(df_train, df_pred, gp, parallel=False):
     return df_add, lg_in
 
 def add_features_category(df_pre,df_inf,gp,ID,col,reps,gb):
+    """
+    回溯此人或此卡過去刷卡記錄, 產生新的features(針對categorical feature), 被add_features_group所呼叫
+    """
     kwargs = {'observed':True, 'sort':False}
     data = dict()
     dtype = sel_int_type(df_inf[col].cat.categories.size)
@@ -464,6 +477,9 @@ def add_features_category(df_pre,df_inf,gp,ID,col,reps,gb):
     return data
 
 def a_isin_b(a,b):
+    """
+    check if a is in set b
+    """
     return a in b
 
 # def add_features_group(df_pre, df_inf, gp, idx_pred):
@@ -613,6 +629,9 @@ def a_isin_b(a,b):
 #     return df_add, lg_in
 
 def add_features(df_train, df_pred, df_add, parallel=False):
+    """
+    回溯此人及此卡過去刷卡記錄, 產生新的features
+    """
     pred_idx = df_pred.index # 保留df_pred原來的index
     # 按客戶排序
     df_train.sort_values(['chid','days_from_start'], inplace=True)
@@ -629,12 +648,18 @@ def add_features(df_train, df_pred, df_add, parallel=False):
     return df_add, lg_in
 
 def sel_int_type(n):
+    """
+    依input數量選擇合適的integer格式
+    """
     p = np.log2(n)
     lg = [p < k for k in (8, 16, 32, 64)]
     dtype = [np.uint8, np.uint16, np.uint32, np.uint64][lg.index(True)]
     return dtype
 
 def add_features_default(df_pred, df_add, gp:str): # gp should be "P"(此人), "C"(此卡) or "PC"
+    """
+    根據testing set維度建立一個新features矩陣, 並賦予預設值
+    """
     data = dict()
     n_record = df_pred.shape[0]
     # boolean features
@@ -689,12 +714,18 @@ def add_features_default(df_pred, df_add, gp:str): # gp should be "P"(此人), "
         return pd.concat([df_new, df_add], axis=0)
 
 def renew_chid_cano(df:pd.DataFrame):
+    """
+    調整chid與cano兩個feature的值, 若無過去盜刷記錄設為'clear'
+    """
     df.loc[df.Plabel_incidence==0,'chid'] = 'clear'
     df.loc[df.Clabel_incidence==0,'cano'] = 'clear'
     df.chid = df.chid.cat.remove_unused_categories()
     df.cano = df.cano.cat.remove_unused_categories()
 
 def assign_chid_cano_categories(df_train_new):
+    """
+    chid與cano兩個feature適當轉換成包含所有類別的格式, 供後續pd.concat使用
+    """
     for col in ('chid','cano'):
         categories = set()
         for df in df_train_new:
@@ -706,6 +737,9 @@ def assign_chid_cano_categories(df_train_new):
             df[col] = df[col].astype(Dtype)
 
 def union_chid_cano_categories(df_train_new, df_pred_new):
+    """
+    testing set的類別必須包含所有training set的類別
+    """
     for col in ('chid','cano'):
         dtype = df_train_new[col].dtype
         lg_in = df_pred_new[col].isin(df_train_new[col].cat.categories)
@@ -717,7 +751,7 @@ def union_chid_cano_categories(df_train_new, df_pred_new):
 if __name__=='__main__':
     # __file__ = '/root/ESUN/codes/create_dataset.py'
     parser = ArgumentParser()
-    parser.add_argument('mode', type=str, choices=['split_from_training','combine_training_and_public'], default='combine_training_and_public')
+    parser.add_argument('--mode', type=str, choices=['split_from_training','combine_training_and_public'], default='combine_training_and_public')
     args = parser.parse_args()
     tStart = datetime.now()
     db_folder1 = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'dataset_1st')
@@ -777,7 +811,7 @@ if __name__=='__main__':
     drop_cols = ['locdt','flam1']
     # deal with df_pred
     print('[Deal with df_pred]')
-    df_pred_add, lg_in = add_features(df_train.copy(),df_pred.copy(),pd.DataFrame())
+    df_pred_add, lg_in = add_features(df_train.copy(),df_pred.copy(),pd.DataFrame(),parallel=True)
     df_pred.drop(columns=drop_cols, inplace=True)
     df_pred_new = pd.concat([df_pred.loc[df_pred_add.index], df_pred_add], axis=1)
     renew_chid_cano(df_pred_new)
@@ -791,13 +825,13 @@ if __name__=='__main__':
         print('[Deal with df_train]',f'day-{i}')
         sli_pred = slice(unqix[i], unqix[i+1])
         sli_train = slice(0, unqix[i])
-        df_add, lg_in = add_features(df_train.iloc[sli_train].copy(), df_train.iloc[sli_pred].copy(), pd.DataFrame())
+        df_add, lg_in = add_features(df_train.iloc[sli_train].copy(), df_train.iloc[sli_pred].copy(), pd.DataFrame(), parallel=True)
         sli_pred = np.r_[sli_pred][lg_in.to_numpy()]
         # data augmentation
         for j in range(1,period):
             if i > j:
                 sli_train = slice(0, unqix[i-j])
-                df_add, lg_in = add_features(df_train.iloc[sli_train].copy(), df_train.iloc[sli_pred].copy(), df_add)
+                df_add, lg_in = add_features(df_train.iloc[sli_train].copy(), df_train.iloc[sli_pred].copy(), df_add, parallel=True)
                 sli_pred = sli_pred[lg_in.to_numpy()]
                 if sli_pred.size==0: break
         df_train_daily = pd.concat([df_train.loc[df_add.index].drop(columns=drop_cols), df_add], axis=1)
@@ -817,7 +851,7 @@ if __name__=='__main__':
     union_chid_cano_categories(df_train_new, df_pred_new)
 
     # output database
-    path_db = os.path.join(db_output,'db.joblib')
+    path_db = os.path.join(db_output,'db-v4.joblib')
     joblib.dump({'train':df_train_new, 'pred':df_pred_new}, path_db, compress=3, protocol=4)
 
     assert df_pred_new.shape[0]==df_pred_new.drop_duplicates().shape[0], 'Found duplicate records'

@@ -1,17 +1,18 @@
+"""
+搜尋模型訓練時的最佳參數
+"""
 # Syntax
 #       python GridSearch.py [db_name] [xgboost/catboost] [a] [b] [c] [d] [e] [f] [--gpu_id=0] [--save_model_thres=1.78] [eval_metric=F1:use_weights=False] ...
 # import logging
 import os
 import joblib
-import sys
-import numpy as np
 from argparse import ArgumentParser
 from datetime import datetime
 # from sklearn.model_selection import GridSearchCV
 from xgboost import XGBClassifier
 from catboost import Pool
 from catboost import CatBoostClassifier
-from lightgbm import LGBMClassifier
+# from lightgbm import LGBMClassifier
 from utils import parse_catboost
 from utils import parse_xgboost
 from utils import generate_dic
@@ -19,9 +20,11 @@ from utils import model_args
 from utils import print_input
 from utils import evaluation
 from utils import search_results
-from sklearn.metrics import f1_score
 
 def parse_args():
+    """
+    parse input
+    """
     parser = ArgumentParser()
     parser.add_argument('db_name', type=str)
     parser.add_argument('mdlname', type=str)
@@ -51,6 +54,9 @@ def parse_args():
     return args_input, args_model
 
 def model_search_params(mdlname):
+    """
+    parameters for model search
+    """
     if mdlname=='catboost':
         params = {
             'max_depth': [2,6,7,8],

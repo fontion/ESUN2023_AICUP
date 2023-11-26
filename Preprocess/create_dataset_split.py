@@ -1,3 +1,6 @@
+"""
+將產生的db-v4.joblib檔再進行分割
+"""
 import os
 import joblib
 from argparse import ArgumentParser

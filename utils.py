@@ -1,10 +1,13 @@
+"""
+共用的函式集
+"""
 import csv
 import joblib
 import numpy as np
 import os
 import pandas as pd
 import multiprocessing
-import cpuinfo
+# import cpuinfo
 import re
 import json
 # import pandas as pd
@@ -19,11 +22,14 @@ from sklearn.metrics import confusion_matrix
 from socket import gethostname
 from catboost import Pool
 from catboost import CatBoostClassifier
-from lightgbm import LGBMClassifier
+# from lightgbm import LGBMClassifier
 # from xgboost import DMatrix
-from xgboost import XGBClassifier
+# from xgboost import XGBClassifier
 
 def thread_count():
+    """
+    估算機器使用的CPU運算核心數量上限
+    """
     info = cpuinfo.get_cpu_info()
     if info['brand_raw']=='13th Gen Intel(R) Core(TM) i9-13900': # w680
         n_thread = 24-2
@@ -39,6 +45,9 @@ def thread_count():
     return n_thread
 
 def parse_catboost(extra, namespace=None):
+    """
+    catboost model parser
+    """
     parser = ArgumentParser()
     # arguments for creating model instance
     parser.add_argument('--n_estimators', type=int, default=50000)
@@ -58,6 +67,9 @@ def parse_catboost(extra, namespace=None):
     return args
 
 def parse_xgboost(extra, namespace=None, gpu_id=0):
+    """
+    xgboost model parser
+    """
     parser = ArgumentParser()
     # arguments for creating model instance
     parser.add_argument('--n_estimators', type=int, default=50000)
@@ -78,6 +90,9 @@ def parse_xgboost(extra, namespace=None, gpu_id=0):
     return args
 
 def parse_lightgbm(extra, namespace=None):
+    """
+    lightgbm model parser
+    """
     parser = ArgumentParser()
     # arguments for creating model instance
     parser.add_argument('--n_estimators', type=int, default=10000)
@@ -97,6 +112,9 @@ def parse_lightgbm(extra, namespace=None):
     return args
 
 def catboost_fillna(df_train, df_pred):
+    """
+    catboost 模型訓練前資料前處理, 補空值
+    """
     for col in df_train.columns[df_train.dtypes=='category']:
         if df_train[col].isna().any():
             if issubclass(df_train[col].cat.categories.dtype.type, np.integer):
@@ -115,6 +133,9 @@ def catboost_fillna(df_train, df_pred):
                 raise AssertionError('Unexpect categorical data type')
 
 def catboost_fillna_pred(df_pred):
+    """
+    catboost 模型預測前資料前處理, 補空值
+    """
     for col in df_pred.columns[df_pred.dtypes=='category']:
         if df_pred[col].isna().any():
             if issubclass(df_pred[col].cat.categories.dtype.type, np.integer):
@@ -130,10 +151,16 @@ def catboost_fillna_pred(df_pred):
                 raise AssertionError('Unexpect categorical data type')
 
 def ylabel2uint8(df_train, df_pred):
+    """
+    convert boolean to uint8
+    """
     df_train.label = df_train.label.astype(np.uint8)
     df_pred.label = df_pred.label.astype(np.uint8)
 
 def generate_dic(path_db, mdlname, allin=False):
+    """
+    產生模型訓練所需的dataset
+    """
     if isinstance(path_db, str) and os.path.isfile(path_db):
         dic = joblib.load(path_db)
         df_train, df_pred = dic['train'], dic['pred']
@@ -187,6 +214,9 @@ def generate_dic(path_db, mdlname, allin=False):
     return dic
 
 def model_args(dataset, mdlname, args_model):
+    """
+    產生模型訓練所需的input arguments
+    """
     args0 = vars(args_model) # convert to dictionary
     if mdlname=='catboost':
         no_early_stopping = isinstance(args_model.early_stopping_rounds, bool)
@@ -226,6 +256,9 @@ def model_args(dataset, mdlname, args_model):
     return (args0, args1)
 
 def print_input(args_input, args_mdinput, param):
+    """
+    print input 內容
+    """
     print('[Input Parameters]')
     rm_names = {'gpu_id','params'}
     d = dict()
@@ -249,6 +282,9 @@ def print_input(args_input, args_mdinput, param):
     print(json.dumps(param, indent=4))
 
 def dump_opt_thres(estimator, dataset, json_path, append_info=dict()):
+    """
+    輸出最佳threshold
+    """
     X = dataset['trainX']
     y_true = dataset['trainY'].to_numpy()
     y_score = estimator.predict_proba(X)
@@ -261,6 +297,9 @@ def dump_opt_thres(estimator, dataset, json_path, append_info=dict()):
         json.dump(info, f, indent=4)
 
 def evaluation(mdlfullname, estimator, dataset, csv_path, dt):
+    """
+    模型訓練好後進行評估, 計算metrics
+    """
     X = dataset['trainX']
     y_true = dataset['trainY'].to_numpy()
     y_score = estimator.predict_proba(X)
@@ -363,6 +402,9 @@ def evaluation(mdlfullname, estimator, dataset, csv_path, dt):
     return f1, pr_auc, opt_thres, opt_f1
 
 def search_results(f1, pr_auc, opt_thres, opt_f1, params, csv_path):
+    """
+    輸出Grid search的結果到csv檔
+    """
     if not os.path.isfile(csv_path):
         output = list(params) + ['F1','PR_AUC','opt_thres','opt_F1']
         with open(csv_path, 'w', newline='') as csvFile:

@@ -1,3 +1,6 @@
+"""
+將create_dataset.py工作拆分, 以方便使用shell多線程處理, 縮短處理時間
+"""
 # Syntax
 #       python create_dataset.py [df_pred/day1/day2/.../day54]
 import os
@@ -87,7 +90,7 @@ if __name__=='__main__':
     else:
         if part=='df_pred':
             print('[Deal with df_pred]')
-            df_pred_add, lg_in = add_features(df_train.copy(),df_pred.copy(),pd.DataFrame())
+            df_pred_add, lg_in = add_features(df_train.copy(),df_pred.copy(),pd.DataFrame(),parallel=True)
             df_pred.drop(columns=drop_cols, inplace=True)
             df_pred_new = pd.concat([df_pred.loc[df_pred_add.index], df_pred_add], axis=1)
             renew_chid_cano(df_pred_new)
@@ -110,13 +113,13 @@ if __name__=='__main__':
                 print('[Deal with df_train]',f'day-{i:02}')
                 sli_pred = slice(unqix[i], unqix[i+1])
                 sli_train = slice(0, unqix[i])
-                df_add, lg_in = add_features(df_train.iloc[sli_train].copy(), df_train.iloc[sli_pred].copy(), pd.DataFrame())
+                df_add, lg_in = add_features(df_train.iloc[sli_train].copy(), df_train.iloc[sli_pred].copy(), pd.DataFrame(), parallel=True)
                 sli_pred = np.r_[sli_pred][lg_in.to_numpy()]
                 # data augmentation
                 for j in range(1,period):
                     if i > j:
                         sli_train = slice(0, unqix[i-j])
-                        df_add, lg_in = add_features(df_train.iloc[sli_train].copy(), df_train.iloc[sli_pred].copy(), df_add)
+                        df_add, lg_in = add_features(df_train.iloc[sli_train].copy(), df_train.iloc[sli_pred].copy(), df_add, parallel=True)
                         sli_pred = sli_pred[lg_in.to_numpy()]
                         if sli_pred.size==0: break
                 df_train_daily = pd.concat([df_train.loc[df_add.index].drop(columns=drop_cols), df_add], axis=1)

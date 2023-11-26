@@ -1,3 +1,6 @@
+"""
+產生正式預測時public或private set時所需的所有features
+"""
 # Syntax
 #       python create_testset.py ['dataset_1st'/'dataset_2nd']
 import os
@@ -11,6 +14,9 @@ from create_dataset import union_chid_cano_categories
 from datetime import datetime
 
 def get_df_pred_new(path_train, path_pred):
+    """
+    產生新的features矩陣包含所有features供模型預測
+    """
     # load raw data
     if isinstance(path_train,str):
         df_train = joblib.load(path_train)
@@ -51,32 +57,36 @@ def get_df_pred_new(path_train, path_pred):
     return df_pred_new
 
 def add_categories(path_db, df_pred_add):
+    """
+    讓categorical features類別一致 (相同categorical feature, testing set需包含所有training set的類別)
+    """
     D = joblib.load(path_db)
     union_chid_cano_categories(D['pred'], df_pred_add)
 
-tStart = datetime.now()
-parser = ArgumentParser()
-parser.add_argument('folder', type=str, choices=['dataset_1st','dataset_2nd'])
-args = parser.parse_args()
+if __name__=='__main__':
+    tStart = datetime.now()
+    parser = ArgumentParser()
+    parser.add_argument('--folder', type=str, choices=['dataset_1st','dataset_2nd'], default='dataset_2nd')
+    args = parser.parse_args()
 
-__file__=='/root/ESUN/codes/create_testset.py'
-prj_folder = os.path.dirname(os.path.dirname(__file__))
-db_folder = os.path.join(prj_folder, args.folder)
-if args.folder=='dataset_1st':
-    path_train = os.path.join(db_folder, 'training_raw.joblib')
-    path_pred = os.path.join(db_folder, 'public_processed_raw.joblib')
-    path_db = os.path.join(db_folder, 'db-v3.joblib')
-    path_pred_new = os.path.join(db_folder, 'public_add_features.joblib')
-elif args.folder=='dataset_2nd':
-    path_train = [
-        os.path.join(prj_folder, 'dataset_1st', 'training_raw.joblib'),
-        os.path.join(prj_folder, 'dataset_2nd', 'public_raw.joblib'),
-    ]
-    path_pred = os.path.join(db_folder, 'private_1_processed_raw.joblib')
-    path_db = os.path.join(db_folder, 'db-v4.joblib')
-    path_pred_new = os.path.join(db_folder, 'private_add_features.joblib')
+    __file__=='/root/ESUN/codes/create_testset.py'
+    prj_folder = os.path.dirname(os.path.dirname(__file__))
+    db_folder = os.path.join(prj_folder, args.folder)
+    if args.folder=='dataset_1st':
+        path_train = os.path.join(db_folder, 'training_raw.joblib')
+        path_pred = os.path.join(db_folder, 'public_processed_raw.joblib')
+        path_db = os.path.join(db_folder, 'db-v3.joblib')
+        path_pred_new = os.path.join(db_folder, 'public_add_features.joblib')
+    elif args.folder=='dataset_2nd':
+        path_train = [
+            os.path.join(prj_folder, 'dataset_1st', 'training_raw.joblib'),
+            os.path.join(prj_folder, 'dataset_2nd', 'public_raw.joblib'),
+        ]
+        path_pred = os.path.join(db_folder, 'private_1_processed_raw.joblib')
+        path_db = os.path.join(db_folder, 'db-v4.joblib')
+        path_pred_new = os.path.join(db_folder, 'private_add_features.joblib')
 
-df_pred_new = get_df_pred_new(path_train, path_pred)
-add_categories(path_db, df_pred_new)
-joblib.dump(df_pred_new, path_pred_new, compress=3, protocol=4)
-print('Elapsed time:', datetime.now() - tStart)
+    df_pred_new = get_df_pred_new(path_train, path_pred)
+    add_categories(path_db, df_pred_new)
+    joblib.dump(df_pred_new, path_pred_new, compress=3, protocol=4)
+    print('Elapsed time:', datetime.now() - tStart)

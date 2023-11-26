@@ -1,7 +1,10 @@
+"""
+計算模型預測時每個feature的貢獻度
+"""
+
 # Syntax
 #       python shap_importance.py [db_name] [mdlname] [params]
 
-import sys
 import joblib
 import os
 import pandas as pd
@@ -9,10 +12,9 @@ import numpy as np
 from argparse import ArgumentParser
 from catboost import Pool
 from catboost import CatBoostClassifier
-from xgboost import DMatrix
+# from xgboost import DMatrix
 from utils import catboost_fillna
 from utils import ylabel2uint8
-from utils import generate_dic
 from tqdm import tqdm
 # from sklearn.metrics import precision_recall_curve
 # from sklearn.metrics import auc
@@ -20,6 +22,9 @@ from tqdm import tqdm
 
 
 def parse_args():
+    """
+    parse input
+    """
     parser = ArgumentParser()
     parser.add_argument('db_name', type=str)
     parser.add_argument('mdlname', type=str)
@@ -30,6 +35,9 @@ def parse_args():
     return parser.parse_args()
 
 def load_db(path_db, mdlname):
+    """
+    載入database並做適當前處理供後續訓練
+    """
     df_train, df_pred = joblib.load(path_db).values()
     if mdlname=='catboost':
         catboost_fillna(df_train, df_pred)
@@ -47,11 +55,17 @@ def load_db(path_db, mdlname):
     return X, y.to_numpy()
 
 def split_task(batch_size, n_sample):
+    """
+    計算批次處理所需的index
+    """
     batch_idx = list(range(0, n_sample, batch_size))
     batch_idx.append(n_sample)
     return batch_idx
 
 def catboost_shap(model, X, ix_pos, ix_neg, batch_size=0):
+    """
+    計算catboost模型預測時每個feature的shapley value
+    """
     n_pos = ix_pos.size
     n_neg = ix_neg.size
     if batch_size > 0:
@@ -101,6 +115,9 @@ def catboost_shap(model, X, ix_pos, ix_neg, batch_size=0):
     return shap_values_pos, shap_values_neg
 
 def xgb_shap(model, X, ix_pos, ix_neg, batch_size):
+    """
+    計算xgboost模型預測時每個feature的shapley value
+    """
     n_pos = ix_pos.size
     n_neg = ix_neg.size
     booster = model.get_booster()

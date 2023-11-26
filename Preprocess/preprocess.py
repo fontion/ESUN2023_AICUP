@@ -1,3 +1,6 @@
+"""
+初步的資料前處理, 妥善轉換資料格式, 如category, boolean, integer, ...
+"""
 import os
 import pandas as pd
 import numpy as np
@@ -5,6 +8,9 @@ import joblib
 from argparse import ArgumentParser
 
 def loctm_mapper():
+    """
+    建立轉換dictionary, 將本來loctm儲存的hhmmss格式映射成秒數
+    """
     to_sec = dict()
     s = 0
     for hour in range(24):
@@ -16,6 +22,9 @@ def loctm_mapper():
     return to_sec
 
 def format_dtypeI(df_train, df_pred):
+    """
+    low level data preprocessing
+    """
     # deal with df_train
     df = df_train
     df.locdt = df.locdt.astype(np.uint8) # 授權日期 train: 0-55; pub: 56-59
@@ -82,6 +91,9 @@ def format_dtypeI(df_train, df_pred):
     df_pred.cano = df_pred.cano.astype('category')
 
 def sanity_card2customer(df):
+    """
+    sanity check: 一張卡被幾個客戶持有
+    """
     ix = np.argsort(df.cano.cat.codes)
     n_card = df.cano.cat.categories.size
     codes_sorted = df.cano[ix].cat.codes.to_numpy()
@@ -96,6 +108,9 @@ def sanity_card2customer(df):
             print(f'card belong to {n_customer} customers', df.cano.cat.categories[i])
 
 def sanity_always_last(df):
+    """
+    sanity check: 盜刷是否總發生在刷卡記錄的最後一筆
+    """
     df.sort_values(['cano','locdt','loctm'], inplace=True)
     n_card = df.cano.cat.categories.size
     codes = df.cano.cat.codes.to_numpy()
@@ -114,6 +129,9 @@ def sanity_always_last(df):
     print('盜刷為最後一筆的卡片共有{}，佔全部 {:.2f}%'.format(count, count/n_card*100))
 
 def ana_usage(df):
+    """
+    sanity check: 剖析客戶刷卡記錄
+    """
     ix = np.argsort(df.chid.cat.codes)
     n_customer = df.chid.cat.categories.size
     codes_sorted = df.chid[ix].cat.codes.to_numpy()
@@ -154,6 +172,9 @@ def ana_usage(df):
     print(pd.Series(y2, index=nc))
 
 def chk_rule(df):
+    """
+    若前一筆是盜刷, 就預測下一筆為盜刷, 這樣正確率有多少
+    """
     df = df.sort_values(['cano','locdt','loctm'])
     n_card = df.cano.cat.categories.size
     codes = df.cano.cat.codes.to_numpy()
@@ -194,8 +215,8 @@ if __name__=='__main__':
         df_train = pd.read_csv(os.path.join(db_folder, train_file_name+'.csv'))
         df_pub = pd.read_csv(os.path.join(db_folder, pub_file_name+'.csv'))
         # save raw data
-        joblib.dump(df_train, os.splitext(path_train)[0]+'_raw.joblib', compress=3, protocol=4)
-        joblib.dump(df_pub, os.splitext(path_pub)[0]+'_raw.joblib', compress=3, protocol=4)
+        joblib.dump(df_train, os.path.splitext(path_train)[0]+'_raw.joblib', compress=3, protocol=4)
+        joblib.dump(df_pub, os.path.splitext(path_pub)[0]+'_raw.joblib', compress=3, protocol=4)
         # preprocessing
         format_dtypeI(df_train, df_pub)
         # output to compressed joblib file
