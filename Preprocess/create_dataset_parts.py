@@ -10,6 +10,7 @@ import joblib
 import sys
 from datetime import datetime
 from preprocess import format_dtypeI
+from create_dataset import format_dtypeII
 from create_dataset import unique_vec
 from create_dataset import add_features
 from create_dataset import add_features_default
@@ -18,10 +19,10 @@ from create_dataset import assign_chid_cano_categories
 from create_dataset import union_chid_cano_categories
 
 if __name__=='__main__':
-    # __file__ = '/root/ESUN/ceodes/create_dataset.py'
+    # __file__ = '/root/ESUN/Preprocess/create_dataset_parts.py'
     tStart = datetime.now()
     db_folder1 = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'dataset_1st')
-    db_folder2 = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'dataset_2nd') # TODO: need modify
+    db_folder2 = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'dataset_2nd')
     mode = 'combine_training_and_public' # [split_from_training/combine_training_and_public]
     part = 'df_pred'
     if len(sys.argv) > 1:
@@ -30,56 +31,31 @@ if __name__=='__main__':
     print('Create mode:', mode)
     print('Process part:', part)
 
+    path_train = os.path.join(db_folder1,'training_raw.joblib')
+    path_public = os.path.join(db_folder2,'public_raw.joblib')
     if mode=='split_from_training':
-        # df_raw = pd.read_csv(os.path.join(db_folder1, 'training.csv'))
-        df_raw = joblib.load(os.path.join(db_folder1, 'training_raw.joblib'))
-        lg = df_raw.locdt > 51 # 取出52, 53, 54, 55四天的記錄做為testing set，佔原來training data的7.19%
-        df_train = df_raw.loc[~lg].copy()
-        df_pred = df_raw.loc[lg].copy() # for validation
-        df_raw = '' # release memory occupied by df_raw
-        format_dtypeI(df_train, df_pred)
+        df_raw = joblib.load(path_train)
         db_output = db_folder1
+        # 取出52, 53, 54, 55四天的記錄做為testing set，佔原來training data的7.19%
         period = 4 # 一次預測的週期是幾天(public set是4天)
     elif mode=='combine_training_and_public':
-        path_train = os.path.join(db_folder1,'training_raw.joblib')
-        path_public = os.path.join(db_folder2,'public_raw.joblib')
         df_raw = pd.concat([joblib.load(path_train), joblib.load(path_public)], axis=0)
-        lg = df_raw.locdt > 54 # 取出55, 56, 57, 58, 59五天的記錄做為testing set，佔原來training data的8.24%
-        df_train = df_raw.loc[~lg].copy()
-        df_pred = df_raw.loc[lg].copy() # for validation
-        df_raw = '' # release memory occupied by df_raw
-        format_dtypeI(df_train, df_pred)
         db_output = db_folder2
+        # 取出55, 56, 57, 58, 59五天的記錄做為testing set，佔原來training data的8.24%
         period = 5 # 一次預測的週期是幾天(private set是5天) 複賽時視情況調整
     else:
         raise AssertionError(f'Unexpect mode: {mode}')
 
-    db_temp = os.path.join(db_output,'temp')
+    lg = df_raw.locdt > (df_raw.locdt.max()-period)
+    df_train = df_raw.loc[~lg].copy()
+    df_pred = df_raw.loc[lg].copy() # for validation
+    df_raw = '' # release memory occupied by df_raw
+    format_dtypeI(df_train, df_pred)
+    df_train, df_pred = format_dtypeII(df_train, df_pred)
+    
+    db_temp = os.path.join(db_output,f'predict_{period}_days')
     if not os.path.isdir(db_temp):
         os.mkdir(db_temp)
-    df_train = df_train.set_index('txkey').drop_duplicates()
-    df_pred = df_pred.set_index('txkey').drop_duplicates()
-    assert df_train.columns.equals(df_pred.columns), 'features mismatch'
-    assert df_train.index.is_unique, 'txkey is not unique'
-    assert df_pred.index.is_unique, 'txkey is not unique'
-    # add days_from_start
-    df_train.insert(0,'days_from_start',df_train.locdt + df_train.loctm/86400) # 取代授權日期locdt和授權時間loctm
-    df_pred.insert(0,'days_from_start',df_pred.locdt + df_pred.loctm/86400) # 取代授權日期locdt和授權時間loctm
-    df_train.sort_values(['locdt','chid','loctm'], inplace=True)
-    df_pred.sort_values(['locdt','chid','loctm'], inplace=True)
-
-    # replace loctm as category data type
-    categories = ['00-03','03-06','06-09','09-12','12-15','15-18','18-21','21-24'] # 每三小時為一個類別
-    df_train.loctm = pd.Categorical.from_codes(df_train.loctm//(3*60*60), categories=categories, ordered=True)
-    df_pred.loctm = pd.Categorical.from_codes(df_pred.loctm//(3*60*60), categories=categories, ordered=True)
-    # add discount
-    df_train.insert(df_train.shape[1],'discount', df_train.conam-df_train.flam1)
-    df_pred.insert(df_pred.shape[1],'discount', df_pred.conam-df_pred.flam1)
-    # add new category 'clear' in chid and cano which represent no fraud before
-    df_train.chid = df_train.chid.cat.add_categories('clear')
-    df_train.cano = df_train.cano.cat.add_categories('clear')
-    df_pred.chid = df_pred.chid.cat.add_categories('clear')
-    df_pred.cano = df_pred.cano.cat.add_categories('clear')
 
     drop_cols = ['locdt','flam1']
     # deal with df_pred
@@ -150,7 +126,7 @@ if __name__=='__main__':
         union_chid_cano_categories(df_train_new, df_pred_new)
 
         # output database
-        path_db = os.path.join(db_output,'db-v4.joblib')
+        path_db = os.path.join(db_output,'db-v4-p7d.joblib')
         joblib.dump({'train':df_train_new, 'pred':df_pred_new}, path_db, compress=3, protocol=4)
 
         assert df_pred_new.shape[0]==df_pred_new.drop_duplicates().shape[0], 'Found duplicate records'

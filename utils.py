@@ -63,6 +63,7 @@ def parse_catboost(extra, namespace=None):
     # arguments for training
     parser.add_argument('--early_stopping_rounds', type=int, default=500)
     parser.add_argument('--no-early-stopping', dest='early_stopping_rounds', action='store_false')
+    parser.add_argument('--max_ctr_complexity', type=int, default=4)
     args = parser.parse_args(extra, namespace) # add new arguments in orginal args
     return args
 

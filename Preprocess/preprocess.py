@@ -112,21 +112,30 @@ def sanity_always_last(df):
     sanity check: 盜刷是否總發生在刷卡記錄的最後一筆
     """
     df.sort_values(['cano','locdt','loctm'], inplace=True)
-    n_card = df.cano.cat.categories.size
-    codes = df.cano.cat.codes.to_numpy()
-    lg_adj = codes[1:]!=codes[:-1]
-    unqix = np.nonzero(np.r_[True, lg_adj])[0] # first appearance
-    unqix = np.r_[unqix, df.shape[0]]
-    assert len(unqix)-1==n_card, 'Unexpect error'
-    label_loc = df.columns.get_loc('label')
-    txkey_loc = df.columns.get_loc('txkey')
-    count = 0
-    for i in range(n_card):
-        if df.iloc[unqix[i]:unqix[i+1], label_loc].any():
-            if not df.iloc[unqix[i]:unqix[i+1]-1, label_loc].any() and df.iat[unqix[i+1]-1, label_loc]:
-                count += 1
-                # print('盜刷為最後一筆，txkey:', df.iat[unqix[i+1]-1, txkey_loc])
-    print('盜刷為最後一筆的卡片共有{}，佔全部 {:.2f}%'.format(count, count/n_card*100))
+    kwargs = {'observed':True, 'sort':False}
+    gb = df.groupby('cano', **kwargs)
+    is_fraud = gb.label.any()
+    last_fraud = gb.label.last()
+    n_fraud_card = is_fraud.sum()
+    fraud_and_last = (is_fraud & last_fraud).sum()
+    print('盜刷為最後一筆的卡片共有{}，佔全部 {:.2f}%'.format(fraud_and_last, fraud_and_last/n_fraud_card*100))
+    # n_card = df.cano.cat.categories.size
+    # codes = df.cano.cat.codes.to_numpy()
+    # lg_adj = codes[1:]!=codes[:-1]
+    # unqix = np.nonzero(np.r_[True, lg_adj])[0] # first appearance
+    # unqix = np.r_[unqix, df.shape[0]]
+    # assert len(unqix)-1==n_card, 'Unexpect error'
+    # label_loc = df.columns.get_loc('label')
+    # txkey_loc = df.columns.get_loc('txkey')
+    # count = 0
+    # fraud_card = 0
+    # for i in range(n_card):
+    #     if df.iloc[unqix[i]:unqix[i+1], label_loc].any():
+    #         fraud_card += 1
+    #         if df.iat[unqix[i+1]-1, label_loc]:
+    #             count += 1
+    #             # print('盜刷為最後一筆，txkey:', df.iat[unqix[i+1]-1, txkey_loc])
+    # print('盜刷為最後一筆的卡片共有{}，佔全部 {:.2f}%'.format(count, count/fraud_card*100))
 
 def ana_usage(df):
     """
@@ -134,13 +143,13 @@ def ana_usage(df):
     """
     ix = np.argsort(df.chid.cat.codes)
     n_customer = df.chid.cat.categories.size
-    codes_sorted = df.chid[ix].cat.codes.to_numpy()
+    codes_sorted = df.chid.iloc[ix].cat.codes.to_numpy()
     lg_adj = codes_sorted[1:]!=codes_sorted[:-1]
     unqix = np.nonzero(np.r_[True, lg_adj])[0] # first appearance
     unqix = np.r_[unqix, df.shape[0]]
     assert len(unqix)-1==n_customer, 'Unexpect error'
-    cano_sorted = df.cano[ix].to_numpy()
-    label_sorted = df.label[ix].to_numpy()
+    cano_sorted = df.cano.iloc[ix].to_numpy()
+    label_sorted = df.label.iloc[ix].to_numpy()
     n_txkey = unqix[1:]-unqix[:-1] # 刷卡次數
     n_card = np.zeros(n_customer, dtype=np.uint8) # 持有信用卡張數
     n_fraud = np.zeros(n_customer, dtype=np.uint16) # 被盜刷次數

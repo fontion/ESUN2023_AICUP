@@ -38,6 +38,9 @@ def parse_args():
     parser.add_argument('--batch_size', type=int, default=100000) # batch processing to prevent out-of-memory
     parser.add_argument('--combineTrainTest', action='store_true', default=False)
     parser.add_argument('--n_estimators', nargs='*', type=int, default=[10000]) # override model's input arguments
+    parser.add_argument('--pos_weight_1', action='store_true', default=True)
+    parser.add_argument('--no-pos_weight_1', dest='pos_weight_1', action='store_false')
+    parser.add_argument('--scale_pos_weight', type=float, default=None)
     args_input, extra = parser.parse_known_args()
     if args_input.combineTrainTest and '--no-early-stopping' not in extra:
         extra.append('--no-early-stopping')
@@ -73,7 +76,10 @@ if __name__=='__main__':
     allin = args_input.combineTrainTest
     dataset = generate_dic(path_db, args_input.mdlname, allin=allin)
     args_mdinput = model_args(dataset, args_input.mdlname, args_model)
-    args_mdinput[0]['scale_pos_weight'] = 1 # 經測試，設為1會有較好的F1 score
+    if args_input.pos_weight_1:
+        args_mdinput[0]['scale_pos_weight'] = 1 # 經測試，設為1會有較好的F1 score
+    if args_input.scale_pos_weight is not None:
+        args_mdinput[0]['scale_pos_weight'] = args_input.scale_pos_weight
 
     if args_input.mdlname=='catboost':
         param_names = ['max_depth','learning_rate','max_leaves','subsample','reg_lambda','min_data_in_leaf']

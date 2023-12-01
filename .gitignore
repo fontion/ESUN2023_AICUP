@@ -4,10 +4,12 @@
 catboost_info/
 CH/
 __pycache__/
+predict_*_days*/
 codes/test_single_model.py
-scripts/
 .lftpignore
 .rsyncignore
+*.pptx
+*.png
 cascade_eval.py
 cascade1.py
 code2twcc.sh
@@ -25,6 +27,7 @@ dataset_1st/*.joblib
 dataset_1st/*.csv
 dataset_1st/positive_rate.xlsx
 dataset_2nd/temp/
+dataset_2nd/*.txt
 dataset_2nd/*.joblib
 dataset_2nd/*.csv
 References/

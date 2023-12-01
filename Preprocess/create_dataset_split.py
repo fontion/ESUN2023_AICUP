@@ -7,7 +7,7 @@ from argparse import ArgumentParser
 
 parser = ArgumentParser()
 parser.add_argument('db_name', type=str, default='db-v4')
-parser.add_argument('mode',nargs='+',help='Allow modes are: FirstUse, UsedBefore, NoFraudBefore, AfterFraud')
+parser.add_argument('mode',nargs='+',help='Allow modes are: FirstUse, UsedBefore, NoFraudBefore, AfterFraud, UsedBeforeFraud')
 args = parser.parse_args()
 
 
@@ -28,12 +28,19 @@ for m in args.mode:
     elif m=='UsedBefore':
         lg_train = (D['train'].Pusage > 0) & (D['train'].Cusage > 0)
         lg_pred = (D['pred'].Pusage > 0) & (D['pred'].Cusage > 0)
+    #----------------------------------------------------------------------------------
     elif m=='NoFraudBefore':
         lg_train = (D['train'].Plabel_incidence==0) & (D['train'].Clabel_incidence==0)
         lg_pred = (D['pred'].Plabel_incidence==0) & (D['pred'].Clabel_incidence==0)
     elif m=='AfterFraud':
         lg_train = (D['train'].Plabel_incidence > 0) | (D['train'].Clabel_incidence > 0)
         lg_pred = (D['pred'].Plabel_incidence > 0) | (D['pred'].Clabel_incidence > 0)
+    #----------------------------------------------------------------------------------
+    elif m=='UsedBeforeFraud': # which means UsedBefore and NoFraudBefore
+        lg_train = (D['train'].Pusage > 0) & (D['train'].Cusage > 0)
+        lg_train &= (D['train'].Plabel_incidence==0) & (D['train'].Clabel_incidence==0)
+        lg_pred = (D['pred'].Pusage > 0) & (D['pred'].Cusage > 0)
+        lg_pred &= (D['pred'].Plabel_incidence==0) & (D['pred'].Clabel_incidence==0)
     
     newdb['train'] = D['train'].loc[lg_train]
     newdb['pred'] = D['pred'].loc[lg_pred]

@@ -30,6 +30,9 @@ def parse_args():
     parser.add_argument('mdlname', type=str)
     parser.add_argument('params', nargs='*', type=str)
     parser.add_argument('--gpu_id', type=int, default=0)
+    parser.add_argument('--pos_weight_1', action='store_true', default=True)
+    parser.add_argument('--no-pos_weight_1', dest='pos_weight_1', action='store_false')
+    parser.add_argument('--scale_pos_weight', type=float, default=None)
     args_input, extra = parser.parse_known_args()
     if 'FirstUse' in args_input.db_name:
         save_model_thres = 1.803
@@ -59,11 +62,11 @@ def model_search_params(mdlname):
     """
     if mdlname=='catboost':
         params = {
-            'max_depth': [2,6,7,8],
+            'max_depth': [2,3,6,7,8],
             'learning_rate': [0.02, 0.03, 0.04, 0.8],
             'max_leaves': [31],
             'subsample': [0.66, 0.7, 0.75, 0.8],
-            'reg_lambda': [3, 3.5, 2.5, 2, 0.02],
+            'reg_lambda': [3, 3.5, 2.5, 2],
             'min_data_in_leaf': [1]
         } # total search space: 5 x 3 x 1 x 4 x 2 = 120
     elif mdlname=='xgboost':
@@ -114,7 +117,10 @@ if __name__=='__main__':
         print('Search parameters:','{}_{}_{}_{}_{}_{}'.format(*[v[i] for v,i in zip(params.values(), args_input.params)][::-1]))
     dataset = generate_dic(path_db, mdlname)
     args_mdinput = model_args(dataset, mdlname, args_model)
-    args_mdinput[0]['scale_pos_weight'] = 1 # 經測試，設為1會有較好的F1 score
+    if args_input.pos_weight_1:
+        args_mdinput[0]['scale_pos_weight'] = 1 # 經測試，設為1會有較好的F1 score
+    if args_input.scale_pos_weight is not None:
+        args_mdinput[0]['scale_pos_weight'] = args_input.scale_pos_weight
     print('eval_metric:', args_mdinput[0]['eval_metric'])
     if mdlname=='xgboost':
         print('device =', args_mdinput[0]['device'])

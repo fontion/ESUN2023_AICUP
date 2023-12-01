@@ -24,217 +24,6 @@ def unique_vec(v:np.ndarray):
     unqix = np.r_[unqix, v.size]
     return unqix
 
-# def get99CI(x:pd.Series, popmean):
-#     n = x.notna().sum()
-#     m = x.mean()
-#     s = x.std()
-#     sem = s / np.sqrt(n)
-#     dof = n - 1
-#     alpha = 0.01
-#     t = stats.t.ppf(1 - (alpha / 2), dof)
-#     d = t*sem
-#     upper_ci = m + d
-#     lower_ci = m - d
-#     t = (m - popmean)/sem
-#     pvalue = stats.t.sf(np.abs(t), dof)*2
-#     return upper_ci, lower_ci, pvalue
-
-# def add_features_P(df_train, df_pred):
-#     df_addP = add_features_default(df_pred, pd.DataFrame(), 'P')
-#     unqix_train = unique_vec(df_train.chid.cat.codes.to_numpy())
-#     lg_inP = df_pred.chid.isin(df_train.chid.iloc[unqix_train[:-1]])
-#     # 顧客有之前的刷卡紀錄
-#     catidx2ix = {catidx:ix for catidx,ix in zip(df_train.chid.cat.codes.iloc[unqix_train[:-1]], range(unqix_train.size-1))} # categories的index 對應 unqix_train的index
-#     ix_in = np.nonzero(lg_inP.to_numpy())[0]
-#     unqix = unique_vec(df_pred.loc[lg_inP,'chid'].to_numpy())
-#     train_unq_chid_idx = [catidx2ix[df_train.chid.cat.categories.get_loc(id)] for id in df_pred.chid.iloc[ix_in[unqix[:-1]]]]
-#     get_loc = df_addP.columns.get_loc
-#     print('Processing chid records...')
-#     for p in tqdm(range(unqix.size-1)):
-#         # 挑出同一位顧客的資料
-#         sli_train = slice(unqix_train[train_unq_chid_idx[p]], unqix_train[train_unq_chid_idx[p]+1])
-#         idx_pred = ix_in[unqix[p]:unqix[p+1]]
-#         df_pre = df_train.iloc[sli_train]
-#         df_inf = df_pred.iloc[idx_pred]
-#         # chid = df_train.chid.iat[unqix_train[train_unq_chid_idx[p]]]
-#         # assert (df_pre.chid==chid).all(), 'Unexpect error'
-#         # assert (df_inf.chid==chid).all(), 'Unexpect error'
-#         # assert (df_train.chid==chid).sum()==df_pre.shape[0], 'Unexpect error'
-#         # assert (df_pred.chid==chid).sum()==df_inf.shape[0], 'Unexpect error'
-#         # assert df_addP.index[idx_pred].equals(df_inf.index), 'Unexpect error'
-#         df_addP.iloc[idx_pred, get_loc('n_card')] = df_pre.cano.unique().size
-#         add_features_group(df_pre, df_inf, df_addP, 'P', idx_pred)
-#     return df_addP, lg_inP
-
-# def add_features_C(df_train, df_pred):
-#     df_addC = add_features_default(df_pred, pd.DataFrame(), 'C')
-#     unqix_train = unique_vec(df_train.cano.cat.codes.to_numpy())
-#     lg_inC = df_pred.cano.isin(df_train.cano.iloc[unqix_train[:-1]])
-#     # 顧客有之前的刷卡紀錄
-#     catidx2ix = {catidx:ix for catidx,ix in zip(df_train.cano.cat.codes.iloc[unqix_train[:-1]], range(unqix_train.size-1))} # categories的index 對應 unqix_train的index
-#     ix_in = np.nonzero(lg_inC.to_numpy())[0]
-#     unqix = unique_vec(df_pred.loc[lg_inC,'cano'].to_numpy())
-#     train_unq_cano_idx = [catidx2ix[df_train.cano.cat.categories.get_loc(id)] for id in df_pred.cano.iloc[ix_in[unqix[:-1]]]]
-#     get_loc = df_addC.columns.get_loc
-#     print('Processing cano records...')
-#     for p in tqdm(range(unqix.size-1)):
-#         # 挑出同一位顧客的資料
-#         sli_train = slice(unqix_train[train_unq_cano_idx[p]], unqix_train[train_unq_cano_idx[p]+1])
-#         idx_pred = ix_in[unqix[p]:unqix[p+1]]
-#         df_pre = df_train.iloc[sli_train]
-#         df_inf = df_pred.iloc[idx_pred]
-#         # cano = df_train.cano.iat[unqix_train[train_unq_cano_idx[p]]]
-#         # assert (df_pre.cano==cano).all(), 'Unexpect error'
-#         # assert (df_inf.cano==cano).all(), 'Unexpect error'
-#         # assert (df_train.cano==cano).sum()==df_pre.shape[0], 'Unexpect error'
-#         # assert (df_pred.cano==cano).sum()==df_inf.shape[0], 'Unexpect error'
-#         # assert df_addC.index[idx_pred].equals(df_inf.index), 'Unexpect error'
-#         df_addC.iloc[idx_pred, get_loc('n_person')] = df_pre.chid.unique().size
-#         add_features_group(df_pre, df_inf, df_addC, 'C', idx_pred)
-#     return df_addC, lg_inC
-
-# def add_features_P(df_train, df_pred):
-#     unqix_train = unique_vec(df_train.chid.cat.codes.to_numpy())
-#     lg_inP = df_pred.chid.isin(df_train.chid.iloc[unqix_train[:-1]])
-#     # 顧客無之前的刷卡紀錄
-#     lg_notin = ~lg_inP
-#     df_addP = [add_features_default(df_pred.loc[lg_notin], pd.DataFrame(), 'P')]
-#     df_addP[0].index = np.nonzero(lg_notin.to_numpy())[0]
-#     # 顧客有之前的刷卡紀錄
-#     catidx2ix = {catidx:ix for catidx,ix in zip(df_train.chid.cat.codes.iloc[unqix_train[:-1]], range(unqix_train.size-1))} # categories的index 對應 unqix_train的index
-#     ix_in = np.nonzero(lg_inP.to_numpy())[0]
-#     unqix = unique_vec(df_pred.chid.cat.codes.loc[lg_inP].to_numpy())
-#     train_unq_chid_idx = [catidx2ix[df_train.chid.cat.categories.get_loc(id)] for id in df_pred.chid.iloc[ix_in[unqix[:-1]]]]
-#     print('Processing chid records...')
-#     for p in tqdm(range(unqix.size-1)):
-#         # 挑出同一位顧客的資料
-#         sli_train = slice(unqix_train[train_unq_chid_idx[p]], unqix_train[train_unq_chid_idx[p]+1])
-#         idx_pred = ix_in[unqix[p]:unqix[p+1]]
-#         df_pre = df_train.iloc[sli_train]
-#         df_inf = df_pred.iloc[idx_pred]
-#         # chid = df_train.chid.iat[unqix_train[train_unq_chid_idx[p]]]
-#         # assert (df_pre.chid==chid).all(), 'Unexpect error'
-#         # assert (df_inf.chid==chid).all(), 'Unexpect error'
-#         # assert (df_train.chid==chid).sum()==df_pre.shape[0], 'Unexpect error'
-#         # assert (df_pred.chid==chid).sum()==df_inf.shape[0], 'Unexpect error'
-#         # assert df_addP.index[idx_pred].equals(df_inf.index), 'Unexpect error'
-#         df_addP.append(add_features_group(df_pre, df_inf, 'P', idx_pred))
-#     df_addP = pd.concat(df_addP, axis=0)
-#     df_addP.sort_index(axis=0, inplace=True)
-#     assert df_addP.shape[0]==df_pred.shape[0], 'Unexpect dimension'
-#     df_addP.index = df_pred.index
-#     return df_addP, lg_inP
-
-# def add_features_P_parallel(df_train, df_pred):
-#     unqix_train = unique_vec(df_train.chid.cat.codes.to_numpy())
-#     lg_inP = df_pred.chid.isin(df_train.chid.iloc[unqix_train[:-1]])
-#     # 顧客無之前的刷卡紀錄
-#     lg_notin = ~lg_inP
-#     df_addP0 = add_features_default(df_pred.loc[lg_notin], pd.DataFrame(), 'P')
-#     df_addP0.index = np.nonzero(lg_notin.to_numpy())[0]
-#     # 顧客有之前的刷卡紀錄
-#     catidx2ix = {catidx:ix for catidx,ix in zip(df_train.chid.cat.codes.iloc[unqix_train[:-1]], range(unqix_train.size-1))} # categories的index 對應 unqix_train的index
-#     ix_in = np.nonzero(lg_inP.to_numpy())[0]
-#     unqix = unique_vec(df_pred.chid.cat.codes.loc[lg_inP].to_numpy())
-#     train_unq_chid_idx = [catidx2ix[df_train.chid.cat.categories.get_loc(id)] for id in df_pred.chid.iloc[ix_in[unqix[:-1]]]]
-#     print('Processing chid records (parallel computing)...')
-#     idx_pred = (ix_in[unqix[p]:unqix[p+1]] for p in range(unqix.size-1))
-#     df_pre = (df_train.iloc[unqix_train[train_unq_chid_idx[p]]:unqix_train[train_unq_chid_idx[p]+1]] for p in range(unqix.size-1))
-#     df_inf = (df_pred.iloc[ix_in[unqix[p]:unqix[p+1]]] for p in range(unqix.size-1))
-#     gp = 'P'*(unqix.size-1)
-#     # star_args = ((df_train.iloc[unqix_train[train_unq_chid_idx[p]]:unqix_train[train_unq_chid_idx[p]+1]],
-#     #               df_pred.iloc[ix_in[unqix[p]:unqix[p+1]]],
-#     #               'P',
-#     #               ix_in[unqix[p]:unqix[p+1]]
-#     #               ) for p in range(unqix.size-1))
-#     # with multiprocessing.Pool() as pool:
-#     #     df_addP = pool.starmap(add_features_group, star_args)
-#     # for p in tqdm(range(unqix.size-1)):
-#     #     # 挑出同一位顧客的資料
-#     #     sli_train = slice(unqix_train[train_unq_chid_idx[p]], unqix_train[train_unq_chid_idx[p]+1])
-#     #     idx_pred.append(ix_in[unqix[p]:unqix[p+1]])
-#     #     df_pre.append(df_train.iloc[sli_train])
-#     #     df_inf.append(df_pred.iloc[idx_pred[-1]])
-#     with concurrent.futures.ProcessPoolExecutor() as executor:
-#         df_addP = executor.map(add_features_group, df_pre, df_inf, gp, idx_pred)
-#     df_addP = pd.concat(df_addP, axis=0)
-#     df_addP = pd.concat([df_addP, df_addP0], axis=0)
-#     df_addP.sort_index(axis=0, inplace=True)
-#     assert df_addP.shape[0]==df_pred.shape[0], 'Unexpect dimension'
-#     df_addP.index = df_pred.index
-#     return df_addP, lg_inP
-
-# def add_features_C(df_train, df_pred):
-#     unqix_train = unique_vec(df_train.cano.cat.codes.to_numpy())
-#     lg_inC = df_pred.cano.isin(df_train.cano.iloc[unqix_train[:-1]])
-#     # 顧客無之前的刷卡紀錄
-#     lg_notin = ~lg_inC
-#     df_addC = [add_features_default(df_pred.loc[lg_notin], pd.DataFrame(), 'C')]
-#     df_addC[0].index = np.nonzero(lg_notin.to_numpy())[0]
-#     # 顧客有之前的刷卡紀錄
-#     catidx2ix = {catidx:ix for catidx,ix in zip(df_train.cano.cat.codes.iloc[unqix_train[:-1]], range(unqix_train.size-1))} # categories的index 對應 unqix_train的index
-#     ix_in = np.nonzero(lg_inC.to_numpy())[0]
-#     unqix = unique_vec(df_pred.cano.cat.codes.loc[lg_inC].to_numpy())
-#     train_unq_cano_idx = [catidx2ix[df_train.cano.cat.categories.get_loc(id)] for id in df_pred.cano.iloc[ix_in[unqix[:-1]]]]
-#     print('Processing cano records...')
-#     for p in tqdm(range(unqix.size-1)):
-#         # 挑出同一位顧客的資料
-#         sli_train = slice(unqix_train[train_unq_cano_idx[p]], unqix_train[train_unq_cano_idx[p]+1])
-#         idx_pred = ix_in[unqix[p]:unqix[p+1]]
-#         df_pre = df_train.iloc[sli_train]
-#         df_inf = df_pred.iloc[idx_pred]
-#         # cano = df_train.cano.iat[unqix_train[train_unq_cano_idx[p]]]
-#         # assert (df_pre.cano==cano).all(), 'Unexpect error'
-#         # assert (df_inf.cano==cano).all(), 'Unexpect error'
-#         # assert (df_train.cano==cano).sum()==df_pre.shape[0], 'Unexpect error'
-#         # assert (df_pred.cano==cano).sum()==df_inf.shape[0], 'Unexpect error'
-#         # assert df_addC.index[idx_pred].equals(df_inf.index), 'Unexpect error'
-#         df_addC.append(add_features_group(df_pre, df_inf, 'C', idx_pred))
-#     df_addC = pd.concat(df_addC, axis=0)
-#     df_addC.sort_index(axis=0, inplace=True)
-#     assert df_addC.shape[0]==df_pred.shape[0], 'Unexpect dimension'
-#     df_addC.index = df_pred.index
-#     return df_addC, lg_inC
-
-# def add_features_C_parallel(df_train, df_pred):
-#     unqix_train = unique_vec(df_train.cano.cat.codes.to_numpy())
-#     lg_inC = df_pred.cano.isin(df_train.cano.iloc[unqix_train[:-1]])
-#     # 顧客無之前的刷卡紀錄
-#     lg_notin = ~lg_inC
-#     df_addC0 = add_features_default(df_pred.loc[lg_notin], pd.DataFrame(), 'C')
-#     df_addC0.index = np.nonzero(lg_notin.to_numpy())[0]
-#     # 顧客有之前的刷卡紀錄
-#     catidx2ix = {catidx:ix for catidx,ix in zip(df_train.cano.cat.codes.iloc[unqix_train[:-1]], range(unqix_train.size-1))} # categories的index 對應 unqix_train的index
-#     ix_in = np.nonzero(lg_inC.to_numpy())[0]
-#     unqix = unique_vec(df_pred.cano.cat.codes.loc[lg_inC].to_numpy())
-#     train_unq_cano_idx = [catidx2ix[df_train.cano.cat.categories.get_loc(id)] for id in df_pred.cano.iloc[ix_in[unqix[:-1]]]]
-#     print('Processing cano records (parallel computing)...')
-#     idx_pred = (ix_in[unqix[p]:unqix[p+1]] for p in range(unqix.size-1))
-#     df_pre = (df_train.iloc[unqix_train[train_unq_cano_idx[p]]:unqix_train[train_unq_cano_idx[p]+1]] for p in range(unqix.size-1))
-#     df_inf = (df_pred.iloc[ix_in[unqix[p]:unqix[p+1]]] for p in range(unqix.size-1))
-#     gp = 'C'*(unqix.size-1)
-#     # star_args = ((df_train.iloc[unqix_train[train_unq_cano_idx[p]]:unqix_train[train_unq_cano_idx[p]+1]],
-#     #               df_pred.iloc[ix_in[unqix[p]:unqix[p+1]]],
-#     #               'C',
-#     #               ix_in[unqix[p]:unqix[p+1]]
-#     #               ) for p in range(unqix.size-1))
-#     # with multiprocessing.Pool() as pool:
-#     #     df_addC = pool.starmap(add_features_group, star_args)
-#     # for p in tqdm(range(unqix.size-1)):
-#     #     # 挑出同一位顧客的資料
-#     #     sli_train = slice(unqix_train[train_unq_cano_idx[p]], unqix_train[train_unq_cano_idx[p]+1])
-#     #     idx_pred.append(ix_in[unqix[p]:unqix[p+1]])
-#     #     df_pre.append(df_train.iloc[sli_train])
-#     #     df_inf.append(df_pred.iloc[idx_pred[-1]])
-#     with concurrent.futures.ProcessPoolExecutor() as executor:
-#         df_addC = executor.map(add_features_group, df_pre, df_inf, gp, idx_pred)
-#     df_addC = pd.concat(df_addC, axis=0)
-#     df_addC = pd.concat([df_addC, df_addC0], axis=0)
-#     df_addC.sort_index(axis=0, inplace=True)
-#     assert df_addC.shape[0]==df_pred.shape[0], 'Unexpect dimension'
-#     df_addC.index = df_pred.index
-#     return df_addC, lg_inC
-
 def add_features_group(df_train, df_pred, gp, parallel=False):
     """
     回溯此人或此卡過去刷卡記錄, 產生新的features
@@ -340,68 +129,6 @@ def add_features_group(df_train, df_pred, gp, parallel=False):
         for col in catcols:
             print('  - categorical feature:',col)
             data.update(add_features_category(df_pre, df_inf, gp, ID, col, reps, gb))
-            # dtype = sel_int_type(df_inf[col].cat.categories.size)
-            # hasNA = df_pre[col].isna().any()
-            # # mode
-            # s_code = pd.Series(df_pre[col].cat.codes.to_numpy(), index=df_pre[ID], name='code')
-            # if hasNA:
-            #     s_code.drop(index=s_code.index[s_code==-1], inplace=True)
-            #     mode_cat = s_code.groupby(level=0,**kwargs).agg(lambda c: c.mode()[0])
-            #     lg_ID_in = df_inf[ID].isin(mode_cat.index).to_numpy()
-            #     if lg_ID_in.all():
-            #         codes = mode_cat.iloc[reps].to_numpy()
-            #     else:
-            #         codes = -np.ones(df_inf.shape[0], dtype=int)
-            #         codes[lg_ID_in] = mode_cat[df_inf.loc[lg_ID_in,ID]].to_numpy()
-            # else:
-            #     mode_cat = s_code.groupby(level=0,**kwargs).agg(lambda c: c.mode()[0])
-            #     codes = mode_cat.iloc[reps].to_numpy()
-            # data[f'{gp}{col}_mode'] = pd.Categorical.from_codes(codes, dtype=df_pre[col].dtype)
-            # # scope
-            # data[f'{gp}{col}_scope'] = gb[col].nunique(dropna=False).iloc[reps].to_numpy(dtype=dtype)
-            # # focus
-            # df_flam1 = pd.DataFrame({ID:df_pre[ID], 'code':df_pre[col].cat.codes, 'flam1':df_pre['flam1']})
-            # if hasNA:
-            #     df_flam1.drop(index=df_flam1.index[df_flam1.code==-1], inplace=True)
-            #     s_flam1 = df_flam1.groupby([ID,'code'],**kwargs).flam1.sum()
-            #     max_cat = s_flam1.groupby(level=0,**kwargs).idxmax().transform(lambda t:t[1])
-            #     lg_ID_in = df_inf[ID].isin(max_cat.index).to_numpy()
-            #     if lg_ID_in.all():
-            #         codes = max_cat.iloc[reps].to_numpy()
-            #     else:
-            #         codes = -np.ones(df_inf.shape[0], dtype=int)
-            #         codes[lg_ID_in] = max_cat[df_inf.loc[lg_ID_in,ID]].to_numpy()
-            # else:
-            #     s_flam1 = df_flam1.groupby([ID,'code'],**kwargs).flam1.sum()
-            #     max_cat = s_flam1.groupby(level=0,**kwargs).idxmax().transform(lambda t:t[1])
-            #     codes = max_cat.iloc[reps].to_numpy()
-            # data[f'{gp}{col}_focus'] = pd.Categorical.from_codes(codes, dtype=df_pre[col].dtype)
-            # # newcat
-            # categories_set = gb[col].agg(lambda x: set(x))
-            # oldcat = np.vectorize(a_isin_b)(df_inf[col], categories_set.iloc[reps])
-            # data[f'{gp}{col}_newcat'] = np.logical_not(oldcat)
-            # # ratio
-            # data[f'{gp}{col}_ratio'] = np.zeros(df_inf.shape[0])
-            # data[f'{gp}{col}_ratio'][df_inf[col].isna().to_numpy()] = np.nan
-            # value_count = df_pre.groupby([ID,col],**kwargs).size() # 不包含col為空值的記錄，本來使用value_counts指令也不包含
-            # group_size_woNA = value_count.groupby(level=0,**kwargs).sum()
-            # value_ratio = value_count/group_size_woNA.loc[value_count.index.get_level_values(0)].to_numpy()
-            # query_index = pd.MultiIndex.from_frame(df_inf[[ID,col]])
-            # lg_ratio_in = query_index.isin(value_ratio.index)
-            # data[f'{gp}{col}_ratio'][lg_ratio_in] = value_ratio.loc[query_index[lg_ratio_in]].to_numpy()
-            # # TopN
-            # value_ratio_descend = value_ratio.to_frame().reset_index().sort_values([ID,0], ascending=False).set_index([ID,col])[0]
-            # lg_lt75 = value_ratio_descend.groupby(level=0,**kwargs).cumsum() <= 0.75
-            # ix_1st = unique_vec(lg_lt75.index.get_level_values(0).codes)[:-1]
-            # lg_lt75.iloc[ix_1st] = True
-            # categories_set = lg_lt75.loc[lg_lt75].reset_index(level=1)[col].groupby(level=0,**kwargs).agg(lambda x:set(x))
-            # lg_ID_in = df_inf[ID].isin(categories_set.index).to_numpy() # 之前的記錄若皆為空值，該ID就會在groupby時被排除
-            # if lg_ID_in.all():
-            #     data[f'{gp}{col}_TopN'] = np.vectorize(a_isin_b)(df_inf[col], categories_set[df_inf[ID]])
-            # else:
-            #     data[f'{gp}{col}_TopN'] = np.zeros(df_inf.shape[0], dtype=bool)
-            #     data[f'{gp}{col}_TopN'][lg_ID_in] = np.vectorize(a_isin_b)(df_inf.loc[lg_ID_in,col], categories_set[df_inf.loc[lg_ID_in,ID]])
-
     df_add = pd.concat([df_add, pd.DataFrame(data, index=ix_in)],axis=0)
     df_add.sort_index(axis=0, inplace=True)
     df_add.index = df_pred.index
@@ -482,152 +209,6 @@ def a_isin_b(a,b):
     """
     return a in b
 
-# def add_features_group(df_pre, df_inf, gp, idx_pred):
-#     N = df_inf.shape[0]
-#     if gp=='P':
-#         data = {'n_card': df_pre.cano.unique().size*np.ones(N, dtype=np.uint8)}
-#     elif gp=='C':
-#         data = {'n_person': df_pre.chid.unique().size*np.ones(N, dtype=np.uint8)}
-#     data[f'{gp}usage'] = df_pre.shape[0]*np.ones(N, dtype=np.uint32)
-#     data[f'{gp}duration'] = (df_inf.days_from_start - df_pre.days_from_start.iloc[-1]).to_numpy()
-#     if df_pre.shape[0]==1:
-#         data[f'{gp}interval'] = 100*np.ones(N)
-#     else: # df_pre.shape[0] > 1
-#         data[f'{gp}interval'] = df_pre.days_from_start.diff().mean()*np.ones(N)
-#     data[f'{gp}fraud_accu'] = df_pre.label.sum()*np.ones(N, dtype=np.uint16)
-#     data[f'{gp}fraud_last'] = np.tile(df_pre.label.iloc[-1], N)
-#     data[f'{gp}stocn_ratio_tw'] = (df_pre.stocn==0).sum()/df_pre.shape[0]*np.ones(N)
-#     data[f'{gp}stscd_abnormal'] = (df_pre.stscd!=-1).sum()/df_pre.shape[0]*np.ones(N) # -1代表正常
-#     # get distribution properties of flam1
-#     meanval = df_pre.flam1.mean()
-#     sem = df_pre.flam1.std()/np.sqrt(df_pre.shape[0])
-#     dof = df_pre.shape[0]-1
-#     ttest_1samp = lambda popmean: stats.t.sf(np.abs((meanval-popmean)/sem), dof)*2 # https://docs.scipy.org/doc/scipy/tutorial/stats.html#t-test-and-ks-test
-#     data[f'{gp}flam1_pvalue'] = ttest_1samp(df_inf.flam1)
-#     upper99ci = meanval + stats.t.ppf(1-(0.01/2), dof)*sem # upper bound of 99% confidence interval
-#     # flam1_pvalue_loc = get_loc(f'{gp}flam1_pvalue')
-#         # for i,popmean in enumerate(df_inf.flam1):
-#         #     df_add.iat[idx_pred[i], flam1_pvalue_loc] = stats.ttest_1samp(a=df_pre.flam1, popmean=popmean)[1]
-#     # numeric feature (flam1)
-#     col = 'flam1'
-#     data[f'{gp}{col}_maxval'] = df_pre[col].max()*np.ones(N)
-#     data[f'{gp}{col}_minval'] = df_pre[col].min()*np.ones(N)
-#     data[f'{gp}{col}_avgval'] = df_pre[col].mean()*np.ones(N)
-#     data[f'{gp}{col}_stdval'] = df_pre[col].std()*np.ones(N)
-#     data[f'{gp}{col}_newrcd'] = (df_inf[col] > df_pre[col].max()).to_numpy()
-#     data[f'{gp}{col}_gt99ci'] = (df_inf[col] > upper99ci).to_numpy()
-#     # boolean features
-#     boolcols = df_inf.columns[df_inf.dtypes==bool].tolist()
-#     if 'label' not in boolcols:
-#         boolcols.append('label')
-#     for col in boolcols:
-#         data[f'{gp}{col}_incidence'] = (df_pre[col].sum()/df_pre.shape[0])*np.ones(N)
-#     # categorical features
-#     catcols = df_inf.columns[df_inf.dtypes=='category'].tolist()
-#     catcols.remove('chid')
-#     catcols.remove('cano')
-#     for col in catcols:
-#         dtype = sel_int_type(df_inf[col].cat.categories.size)
-#         if df_pre[col].notna().any():
-#             data[f'{gp}{col}_mode'] = pd.Categorical.from_codes([df_pre[col].cat.codes.mode().iloc[0]]*N, dtype=df_inf[col].dtype)
-#             data[f'{gp}{col}_scope'] = df_pre[col].unique().size*np.ones(N, dtype=dtype) # nan也算一類
-#             groupby = df_pre[[col,'flam1']].groupby(col, observed=True).sum().flam1 # A series indexed by categories and values are summary value correspond to the category
-#             code = df_inf[col].dtype.categories.get_loc(groupby.index[groupby.argmax()])
-#             data[f'{gp}{col}_focus'] = pd.Categorical.from_codes([code]*N, dtype=df_inf[col].dtype)
-#         else:
-#             data[f'{gp}{col}_mode'] = pd.Categorical.from_codes([-1]*N, dtype=df_inf[col].dtype)
-#             data[f'{gp}{col}_scope'] = np.zeros(N, dtype=dtype)
-#             data[f'{gp}{col}_focus'] = pd.Categorical.from_codes([-1]*N, dtype=df_inf[col].dtype)
-#         oldcat = df_inf[col].isin(df_pre.loc[df_pre[col].notna(),col]).to_numpy()
-#         data[f'{gp}{col}_newcat'] = np.logical_not(oldcat) # 空值也算newcat
-#         data[f'{gp}{col}_ratio'] = np.zeros(N)
-#         data[f'{gp}{col}_ratio'][df_inf[col].isna().to_numpy()] = np.nan
-#         data[f'{gp}{col}_TopN'] = np.zeros(N, dtype=bool)
-#         if oldcat.any():
-#             value_count = df_pre[col].value_counts()
-#             value_count_sum = value_count.sum()
-#             cum_percent = value_count.cumsum().to_numpy()/value_count_sum
-#             ix = max(1, np.nonzero(cum_percent > 0.75)[0][0])
-#             topN_categories = value_count.index[:ix] # 排名前75%的類別
-#             idx = np.nonzero(oldcat)[0]
-#             data[f'{gp}{col}_ratio'][idx] = value_count[df_inf[col].iloc[idx]].to_numpy()/value_count_sum
-#             data[f'{gp}{col}_TopN'][idx] = df_inf[col].iloc[idx].isin(topN_categories).to_numpy()
-#     return pd.DataFrame(data, index=idx_pred)
-
-# def add_features_group(df_pre, df_inf, df_add, gp, idx_pred): # gp should be "P" or "C"
-#     get_loc = df_add.columns.get_loc
-#     df_add.iloc[idx_pred, get_loc(f'{gp}usage')] = df_pre.shape[0]
-#     df_add.iloc[idx_pred, get_loc(f'{gp}duration')] = df_inf.days_from_start - df_pre.days_from_start.iloc[-1]
-#     if df_pre.shape[0] > 1:
-#         df_add.iloc[idx_pred, get_loc(f'{gp}interval')] = df_pre.days_from_start.diff().mean()
-#     df_add.iloc[idx_pred, get_loc(f'{gp}fraud_accu')] = df_pre.label.sum()
-#     df_add.iloc[idx_pred, get_loc(f'{gp}fraud_last')] = df_pre.label.iloc[-1]
-#     df_add.iloc[idx_pred, get_loc(f'{gp}stocn_ratio_tw')] = (df_pre.stocn==0).sum()/df_pre.shape[0]
-#     df_add.iloc[idx_pred, get_loc(f'{gp}stscd_abnormal')] = (df_pre.stscd!=-1).sum()/df_pre.shape[0] # -1代表正常
-#     # get distribution properties of flam1
-#     meanval = df_pre.flam1.mean()
-#     sem = df_pre.flam1.std()/np.sqrt(df_pre.shape[0])
-#     dof = df_pre.shape[0]-1
-#     ttest_1samp = lambda popmean: stats.t.sf(np.abs((meanval-popmean)/sem), dof)*2 # https://docs.scipy.org/doc/scipy/tutorial/stats.html#t-test-and-ks-test
-#     df_add.iloc[idx_pred, get_loc(f'{gp}flam1_pvalue')] = ttest_1samp(df_inf.flam1)
-#     upper99ci = meanval + stats.t.ppf(1-(0.01/2), dof)*sem # upper bound of 99% confidence interval
-#     # flam1_pvalue_loc = get_loc(f'{gp}flam1_pvalue')
-#         # for i,popmean in enumerate(df_inf.flam1):
-#         #     df_add.iat[idx_pred[i], flam1_pvalue_loc] = stats.ttest_1samp(a=df_pre.flam1, popmean=popmean)[1]
-#     # numeric feature (flam1)
-#     col = 'flam1'
-#     df_add.iloc[idx_pred, get_loc(f'{gp}{col}_maxval')] = df_pre[col].max()
-#     df_add.iloc[idx_pred, get_loc(f'{gp}{col}_minval')] = df_pre[col].min()
-#     df_add.iloc[idx_pred, get_loc(f'{gp}{col}_avgval')] = df_pre[col].mean()
-#     df_add.iloc[idx_pred, get_loc(f'{gp}{col}_stdval')] = df_pre[col].std()
-#     df_add.iloc[idx_pred, get_loc(f'{gp}{col}_newrcd')] = df_inf[col] > df_pre[col].max()
-#     df_add.iloc[idx_pred, get_loc(f'{gp}{col}_gt99ci')] = df_inf[col] > upper99ci
-#     # boolean features
-#     boolcols = df_inf.columns[df_inf.dtypes==bool].tolist()
-#     if 'label' not in boolcols:
-#         boolcols.append('label')
-#     for col in boolcols:
-#         df_add.iloc[idx_pred, get_loc(f'{gp}{col}_incidence')] = df_pre[col].sum()/df_pre.shape[0]
-#     # categorical features
-#     catcols = df_inf.columns[df_inf.dtypes=='category'].tolist()
-#     catcols.remove('chid')
-#     catcols.remove('cano')
-#     for col in catcols:
-#         if df_pre[col].notna().any():
-#             df_add.iloc[idx_pred, get_loc(f'{gp}{col}_mode')] = df_pre[col].mode().iloc[0]
-#             df_add.iloc[idx_pred, get_loc(f'{gp}{col}_scope')] = df_pre[col].unique().size # nan也算一類
-#             groupby = df_pre[[col,'flam1']].groupby(col, observed=True).sum().flam1 # A series indexed by categories and values are summary value correspond to the category
-#             df_add.iloc[idx_pred, get_loc(f'{gp}{col}_focus')] = groupby.index[groupby.argmax()]
-#         newcat_loc = get_loc(f'{gp}{col}_newcat')
-#         ratio_loc = get_loc(f'{gp}{col}_ratio')
-#         TopN_loc = get_loc(f'{gp}{col}_TopN')
-#         for i in np.nonzero(df_inf[col].notna().to_numpy())[0]:
-#             tf = df_inf[col].iat[i] not in set(df_pre[col]) # 空值必定不在set中，即便set中包含nan
-#             df_add.iat[idx_pred[i], newcat_loc] = tf
-#             if not tf:
-#                 value_count = df_pre[col].value_counts()
-#                 df_add.iat[idx_pred[i], ratio_loc] = value_count[df_inf[col].iat[i]]/value_count.sum()
-#                 cum_percent = value_count.cumsum()/value_count.sum()
-#                 ix = max(1, np.nonzero(cum_percent.to_numpy() > 0.75)[0][0])
-#                 df_add.iat[idx_pred[i], TopN_loc] = df_inf[col].iat[i] in set(value_count.index[:ix])
-
-# def add_features(df_train, df_pred, df_add):
-#     pred_idx = df_pred.index # 保留df_pred原來的index
-#     # 按客戶排序
-#     df_train.sort_values(['chid','days_from_start'], inplace=True)
-#     df_pred.sort_values(['chid','days_from_start'], inplace=True)
-#     df_addP, lg_inP = add_features_P_parallel(df_train, df_pred)
-#     # 按卡片排序
-#     df_train.sort_values(['cano','days_from_start'], inplace=True)
-#     df_pred.sort_values(['cano','days_from_start'], inplace=True)
-#     df_addC, lg_inC = add_features_C_parallel(df_train, df_pred)
-#     assert df_addP.shape[0]==df_pred.shape[0], 'Unexpect error'
-#     assert df_addC.shape[0]==df_pred.shape[0], 'Unexpect error'
-#     df_addPC = pd.concat([df_addP.loc[pred_idx], df_addC.loc[pred_idx]], axis=1)
-#     df_add = pd.concat([df_addPC, df_add], axis=0)
-#     lg_in = lg_inP.loc[pred_idx] | lg_inC.loc[pred_idx]
-#     return df_add, lg_in
-
 def add_features(df_train, df_pred, df_add, parallel=False):
     """
     回溯此人及此卡過去刷卡記錄, 產生新的features
@@ -643,7 +224,10 @@ def add_features(df_train, df_pred, df_add, parallel=False):
     df_addC, lg_inC = add_features_group(df_train, df_pred, 'C', parallel)
     # Combine two DataFrames
     df_addPC = pd.concat([df_addP.loc[pred_idx], df_addC.loc[pred_idx]], axis=1)
-    df_add = pd.concat([df_addPC, df_add], axis=0)
+    if df_add.empty:
+        df_add = df_addPC
+    else:
+        df_add = pd.concat([df_addPC, df_add], axis=0)
     lg_in = lg_inP.loc[pred_idx] | lg_inC.loc[pred_idx]
     return df_add, lg_in
 
@@ -748,42 +332,7 @@ def union_chid_cano_categories(df_train_new, df_pred_new):
             dtype = pd.CategoricalDtype(categories=categories, ordered=False)
         df_pred_new[col] = df_pred_new[col].astype(dtype)
 
-if __name__=='__main__':
-    # __file__ = '/root/ESUN/codes/create_dataset.py'
-    parser = ArgumentParser()
-    parser.add_argument('--mode', type=str, choices=['split_from_training','combine_training_and_public'], default='combine_training_and_public')
-    args = parser.parse_args()
-    tStart = datetime.now()
-    db_folder1 = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'dataset_1st')
-    db_folder2 = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'dataset_2nd')
-    print('Create mode:', args.mode)
-
-    if args.mode=='split_from_training':
-        path_train = os.path.join(db_folder1, 'training_raw.joblib')
-        if os.path.isfile(path_train):
-            df_raw = joblib.load(path_train)
-        else:
-            df_raw = pd.read_csv(os.path.join(db_folder1, 'training.csv'))
-            joblib.dump(df_raw, path_train, compress=3, protocol=4)
-        lg = df_raw.locdt > 51 # 取出52, 53, 54, 55四天的記錄做為testing set，佔原來training data的7.19%
-        df_train = df_raw.loc[~lg].copy()
-        df_pred = df_raw.loc[lg].copy() # for validation
-        df_raw = '' # release memory occupied by df_raw
-        format_dtypeI(df_train, df_pred)
-        db_output = db_folder1
-        period = 4 # 一次預測的週期是幾天(public set是4天)
-    elif args.mode=='combine_training_and_public':
-        path_train = os.path.join(db_folder1,'training_raw.joblib')
-        path_public = os.path.join(db_folder2,'public_raw.joblib')
-        df_raw = pd.concat([joblib.load(path_train), joblib.load(path_public)], axis=0, ignore_index=True)
-        lg = df_raw.locdt > 54 # 取出55, 56, 57, 58, 59五天的記錄做為testing set，佔原來training data的8.24%
-        df_train = df_raw.loc[~lg].copy()
-        df_pred = df_raw.loc[lg].copy() # for validation
-        df_raw = '' # release memory occupied by df_raw
-        format_dtypeI(df_train, df_pred)
-        db_output = db_folder2
-        period = 5 # 一次預測的週期是幾天(private set是5天) 複賽時視情況調整
-
+def format_dtypeII(df_train, df_pred):
     df_train = df_train.set_index('txkey').drop_duplicates()
     df_pred = df_pred.set_index('txkey').drop_duplicates()
     assert df_train.columns.equals(df_pred.columns), 'features mismatch'
@@ -807,6 +356,38 @@ if __name__=='__main__':
     df_train.cano = df_train.cano.cat.add_categories('clear')
     df_pred.chid = df_pred.chid.cat.add_categories('clear')
     df_pred.cano = df_pred.cano.cat.add_categories('clear')
+    return df_train, df_pred
+
+if __name__=='__main__':
+    # __file__ = '/root/ESUN/codes/create_dataset.py'
+    parser = ArgumentParser()
+    parser.add_argument('--mode', type=str, choices=['split_from_training','combine_training_and_public'], default='combine_training_and_public')
+    args = parser.parse_args()
+    tStart = datetime.now()
+    db_folder1 = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'dataset_1st')
+    db_folder2 = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'dataset_2nd')
+    print('Create mode:', args.mode)
+
+    path_train = os.path.join(db_folder1,'training_raw.joblib')
+    path_public = os.path.join(db_folder2,'public_raw.joblib')
+    if args.mode=='split_from_training':
+        df_raw = joblib.load(path_train)
+        db_output = db_folder1
+        # 取出52, 53, 54, 55四天的記錄做為testing set，佔原來training data的7.19%
+        period = 4 # 一次預測的週期是幾天(public set是4天)
+        
+    elif args.mode=='combine_training_and_public':
+        df_raw = pd.concat([joblib.load(path_train), joblib.load(path_public)], axis=0, ignore_index=True)
+        db_output = db_folder2
+        # 取出55, 56, 57, 58, 59五天的記錄做為testing set，佔原來training data的8.24%
+        period = 5 # 一次預測的週期是幾天(private set是5天) 複賽時視情況調整
+
+    lg = df_raw.locdt > (df_raw.locdt.max()-period)
+    df_train = df_raw.loc[~lg].copy()
+    df_pred = df_raw.loc[lg].copy() # for validation
+    df_raw = '' # release memory occupied by df_raw
+    format_dtypeI(df_train, df_pred)
+    df_train, df_pred = format_dtypeII(df_train, df_pred)
 
     drop_cols = ['locdt','flam1']
     # deal with df_pred
