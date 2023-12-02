@@ -17,8 +17,8 @@ from create_dataset import union_chid_cano_categories
 
 def parse_args():
     parser = ArgumentParser()
-    parser.add_argument('--mode', type=str, choices=['split_from_training','combine_training_and_public'], default='split_from_training')
-    parser.add_argument('--db_name', type=str, default='db-v4')
+    parser.add_argument('--mode', type=str, choices=['split_from_training','combine_training_and_public','final_competition'], default='final_competition')
+    parser.add_argument('--db_name', type=str, default='db-v5')
     parser.add_argument('--parallel', action='store_true', default=False)
     parser.add_argument('--no-parallel', dest='parallel', action='store_false')
     parser.add_argument('--max_workers', type=int, default=None)
@@ -27,7 +27,9 @@ def parse_args():
     if args.mode=='split_from_training':
         parser.add_argument('--period', type=int, default=4) # 一次預測的週期是幾天(public set是4天)
     elif args.mode=='combine_training_and_public':
-        parser.add_argument('--period', type=int, default=5) # 一次預測的週期是幾天(private set是5天) 複賽時視情況調整
+        parser.add_argument('--period', type=int, default=5) # 一次預測的週期是幾天(private set是5天)
+    elif args.mode=='final_competition':
+        parser.add_argument('--period', type=int, default=5) # 一次預測的週期是幾天(private set2是5天) 複賽
     args = parser.parse_args(extra, args)
     return args
 

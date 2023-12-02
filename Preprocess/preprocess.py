@@ -204,7 +204,7 @@ def chk_rule(df):
 if __name__=='__main__':
     # __file__ = '/root/ESUN/codes/load_db.py'
     parser = ArgumentParser()
-    parser.add_argument('folder', type=str, choices=['dataset_1st','dataset_2nd'], default='dataset_2nd')
+    parser.add_argument('folder', type=str, choices=['dataset_1st','dataset_2nd','dataset_3rd'], default='dataset_3rd')
     args = parser.parse_args()
     print('Dataset folder:', args.folder)
     db_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), args.folder)
@@ -214,6 +214,9 @@ if __name__=='__main__':
     elif args.folder=='dataset_2nd':
         path_train = os.path.join(db_folder, 'public.joblib')
         path_pub = os.path.join(db_folder, 'private_1_processed.joblib')
+    elif args.folder=='dataset_3rd':
+        path_train = os.path.join(db_folder, 'private_1.joblib')
+        path_pub = os.path.join(db_folder, 'private_2_processed.joblib')
     if os.path.isfile(path_train) and os.path.isfile(path_pub):
         df_train = joblib.load(path_train)
         df_pub = joblib.load(path_pub)

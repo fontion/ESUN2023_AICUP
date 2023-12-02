@@ -23,13 +23,27 @@ def parse_args():
     parser.add_argument('db_name', type=str)
     parser.add_argument('mdlname', type=str)
     parser.add_argument('params', nargs='+')
+    parser.add_argument('--use_pretrain', action='store_true', default=True)
+    parser.add_argument('--no-use_pretrain', dest='use_pretrain', action='store_false')
+    parser.add_argument('--pretrain_models', nargs='*')
     args, extra = parser.parse_known_args()
     if args.mdlname=='catboost':
-        if 'FirstUse' in args.db_name:
-            # subfolder = os.path.join('eval_metric=PRAUC_use_weights',args.db_name[3:5])
-            subfolder = os.path.join('eval_metric=F1', args.db_name[3:5])
-        elif 'UsedBefore' in args.db_name:
-            subfolder = os.path.join('eval_metric=F1', args.db_name[3:5])
+        if args.use_pretrain:
+            if 'FirstUse' in args.db_name:
+                subfolder = os.path.join('pretrain_models','FirstUse')
+            elif 'UsedBeforeFraud' in args.db_name:
+                subfolder = os.path.join('pretrain_models','UsedBeforeFraud')
+            elif 'AfterFraud' in args.db_name:
+                subfolder = os.path.join('pretrain_models','AfterFraud')
+        else:
+            if 'FirstUse' in args.db_name:
+                # subfolder = os.path.join('eval_metric=PRAUC_use_weights',args.db_name[3:5])
+                subfolder = os.path.join('eval_metric=F1', args.db_name[3:5])
+            elif 'UsedBefore' in args.db_name:
+                subfolder = os.path.join('eval_metric=F1', args.db_name[3:5])
+            else:
+                subfolder = os.path.join('eval_metric=F1', args.db_name[3:5])
+
     else:
         subfolder = ''
     parser = ArgumentParser()
@@ -47,17 +61,24 @@ if __name__=='__main__':
 
 
     prj_folder = os.path.dirname(os.path.dirname(__file__))
-    if int(args.db_name[4]) < 4:
+    ver = int(args.db_name[4])
+    if ver < 4:
         path_db = os.path.join(prj_folder,'dataset_1st',f'{args.db_name}.joblib')
-    else:
+    elif ver < 5:
         path_db = os.path.join(prj_folder,'dataset_2nd',f'{args.db_name}.joblib')
+    else:
+        path_db = os.path.join(prj_folder,'dataset_3rd',f'{args.db_name}.joblib')
     dataset = generate_dic(path_db, args.mdlname, allin=True)
-    mdl_folder = os.path.join(prj_folder,'train_test',f'{args.mdlname}_search', args.subfolder)
+    if args.use_pretrain:
+        mdl_folder = os.path.join(prj_folder,args.subfolder)
+    else:
+        mdl_folder = os.path.join(prj_folder,'train_test',f'{args.mdlname}_search', args.subfolder)
     y_score = np.zeros(dataset['trainY'].size)
     mdlfile = []
     for p in args.params:
         if args.mdlname=='catboost':
-            mdlfile.append(f'{args.db_name}-{p}(allin).cbm')
+            # mdlfile.append(f'{args.db_name}-{p}(allin).cbm')
+            mdlfile.append(f'db-v4-{args.db_name[6:]}-{p}(allin).cbm')
             mdl_path = os.path.join(mdl_folder, mdlfile[-1])
             model = CatBoostClassifier()
             model.load_model(mdl_path)

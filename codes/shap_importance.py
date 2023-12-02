@@ -81,7 +81,7 @@ def catboost_shap(model, X, ix_pos, ix_neg, batch_size=0):
                 shap_values_pos += np.abs(shap_values[:,:-1]).sum(axis=0)
             for b in tqdm(range(len(batch_idx_neg)-1), desc='negative'):
                 sli = slice(batch_idx_neg[b], batch_idx_neg[b+1])
-                pool = X.slice(ix_pos[sli])
+                pool = X.slice(ix_neg[sli])
                 shap_values = model.get_feature_importance(pool, type='ShapValues')
                 shap_values_neg += np.abs(shap_values[:,:-1]).sum(axis=0)
         elif isinstance(X, pd.DataFrame):
@@ -157,7 +157,7 @@ if __name__=='__main__':
     print('Loading database:', args.db_name)
     # __file__ = '/root/ESUN/codes/shap_importance.py'
     prj_folder = os.path.dirname(os.path.dirname(__file__))
-    path_db = os.path.join(prj_folder,'dataset_1st',f'{args.db_name}.joblib')
+    path_db = os.path.join(prj_folder,'dataset_2nd',f'{args.db_name}.joblib')
     X, y_true = load_db(path_db, args.mdlname)
 
     mdl_folder = os.path.join(prj_folder,'train_test',f'{args.mdlname}_search',
@@ -166,7 +166,7 @@ if __name__=='__main__':
     for param in args.params:
         print('Processing:', param)
         if args.mdlname=='catboost':
-            mdlfile = f'{args.db_name}-{param}.cbm'
+            mdlfile = f'{args.db_name}-{param}(allin).cbm'
             path_mdl = os.path.join(mdl_folder, mdlfile)
             if not os.path.isfile(path_mdl):
                 raise AssertionError(f'Model file not found: {path_mdl}')

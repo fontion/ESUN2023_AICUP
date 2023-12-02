@@ -141,3 +141,20 @@ json_path2="train_test/catboost_search/db-v4-UsedBefore-14_3_0.66_31_0.03_8(alli
 python3 test_main.py --folder=$folder --model_FirstUse=$json_path1 --model_UsedBefore=$json_path2
 ```
 > 最後的預測結果會輸出放在submit資料夾，檔名 31_{日期}upload.csv
+
+
+## 複賽
+```
+db_name="db-v5-FirstUse"
+mdlname="catboost"
+param1="1_2_0.7_31_0.02_7"
+param2="1_2_0.75_31_0.04_7"
+param3="1_2_0.75_31_0.8_7"
+python3 -m Model.opt_thres_final $db_name $mdlname $param1 $param2 $param3
+```
+
+
+```
+json_path1="pretrain_models/embedding_3_models.json"
+json_path2="pretrain_models/UsedBeforeFraud/"
+```

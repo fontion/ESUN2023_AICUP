@@ -41,6 +41,9 @@ def parse_args():
     parser.add_argument('--pos_weight_1', action='store_true', default=True)
     parser.add_argument('--no-pos_weight_1', dest='pos_weight_1', action='store_false')
     parser.add_argument('--scale_pos_weight', type=float, default=None)
+    parser.add_argument('--use_pretrain', action='store_true', default=True)
+    parser.add_argument('--no-use_pretrain', dest='use_pretrain', action='store_false')
+    parser.add_argument('--pretrain_models', nargs='*')
     args_input, extra = parser.parse_known_args()
     if args_input.combineTrainTest and '--no-early-stopping' not in extra:
         extra.append('--no-early-stopping')

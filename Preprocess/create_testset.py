@@ -66,10 +66,10 @@ def add_categories(path_db, df_pred_add):
 if __name__=='__main__':
     tStart = datetime.now()
     parser = ArgumentParser()
-    parser.add_argument('--folder', type=str, choices=['dataset_1st','dataset_2nd'], default='dataset_2nd')
+    parser.add_argument('--folder', type=str, choices=['dataset_1st','dataset_2nd','dataset_3rd'], default='dataset_3rd')
     args = parser.parse_args()
 
-    __file__=='/root/ESUN/codes/create_testset.py'
+    # __file__=='/root/ESUN/codes/create_testset.py'
     prj_folder = os.path.dirname(os.path.dirname(__file__))
     db_folder = os.path.join(prj_folder, args.folder)
     if args.folder=='dataset_1st':
@@ -85,6 +85,15 @@ if __name__=='__main__':
         path_pred = os.path.join(db_folder, 'private_1_processed_raw.joblib')
         path_db = os.path.join(db_folder, 'db-v4.joblib')
         path_pred_new = os.path.join(db_folder, 'private_add_features.joblib')
+    elif args.folder=='dataset_3rd':
+        path_train = [
+            os.path.join(prj_folder, 'dataset_1st', 'training_raw.joblib'),
+            os.path.join(prj_folder, 'dataset_2nd', 'public_raw.joblib'),
+            os.path.join(prj_folder, 'dataset_3rd', 'private_1_raw.joblib')
+        ]
+        path_pred = os.path.join(db_folder, 'private_2_processed_raw.joblib')
+        path_db = os.path.join(db_folder, 'db-v5.joblib')
+        path_pred_new = os.path.join(db_folder, 'private2_add_features.joblib')
 
     df_pred_new = get_df_pred_new(path_train, path_pred)
     add_categories(path_db, df_pred_new)

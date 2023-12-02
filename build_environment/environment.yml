@@ -3,15 +3,15 @@ channels:
   - conda-forge
   - anaconda
 dependencies:
-  - python=3.10
+  - python
   - cudatoolkit=11.6
   - joblib
   - ipython
   - jupyterlab
   - notebook
   - catboost=1.2.2
+  - scikit-learn
   - pandas
   - xlrd
   - openpyxl
-  - odfpy
   - tqdm

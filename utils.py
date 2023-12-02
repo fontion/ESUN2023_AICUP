@@ -50,20 +50,27 @@ def parse_catboost(extra, namespace=None):
     """
     parser = ArgumentParser()
     # arguments for creating model instance
-    parser.add_argument('--n_estimators', type=int, default=50000)
+    parser.add_argument('--n_estimators', type=int, default=0)
     parser.add_argument('--random_seed', type=int, default=8)
-    parser.add_argument('--task_type', type=str, default='GPU')
-    parser.add_argument('--bootstrap_type', type=str, default='Poisson')
+    parser.add_argument('--task_type', type=str, default='CPU')
+    parser.add_argument('--bootstrap_type', type=str, default='Ordered')
     parser.add_argument('--target_border', type=float, default=0.5)
     parser.add_argument('--loss_function', type=str, default='Logloss')
     # parser.add_argument('--custom_metric', type=str, default='F1:use_weights=false')
     # parser.add_argument('--eval_metric', type=str, default='F1:use_weights=false')
-    parser.add_argument('--custom_metric', type=str, default='PRAUC:type=Classic;use_weights=False')
-    parser.add_argument('--eval_metric', type=str, default='PRAUC:type=Classic;use_weights=False')
+    parser.add_argument('--custom_metric', type=str, default='F1')
+    parser.add_argument('--eval_metric', type=str, default='F1')
     # arguments for training
     parser.add_argument('--early_stopping_rounds', type=int, default=500)
     parser.add_argument('--no-early-stopping', dest='early_stopping_rounds', action='store_false')
+    # new parameters from team member
     parser.add_argument('--max_ctr_complexity', type=int, default=4)
+    parser.add_argument('--one_hot_max_size', type=int, default=10)
+    parser.add_argument('--random_strength', type=float, default=10)
+    parser.add_argument('--rsm', type=float, default=0.5)
+    parser.add_argument('--max_leaves', type=int, default=4)
+
+
     args = parser.parse_args(extra, namespace) # add new arguments in orginal args
     return args
 

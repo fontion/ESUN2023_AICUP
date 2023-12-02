@@ -1,12 +1,12 @@
 """
-將產生的db-v4.joblib檔再進行分割
+將產生的db-v5.joblib檔再進行分割
 """
 import os
 import joblib
 from argparse import ArgumentParser
 
 parser = ArgumentParser()
-parser.add_argument('db_name', type=str, default='db-v4')
+parser.add_argument('--db_name', type=str, default='db-v5')
 parser.add_argument('mode',nargs='+',help='Allow modes are: FirstUse, UsedBefore, NoFraudBefore, AfterFraud, UsedBeforeFraud')
 args = parser.parse_args()
 
@@ -16,8 +16,10 @@ prj_folder = os.path.dirname(os.path.dirname(__file__))
 ver = int(args.db_name[4])
 if ver < 4:
     db_folder = 'dataset_1st'
-else:
+elif ver < 5:
     db_folder = 'dataset_2nd'
+else:
+    db_folder = 'dataset_3rd'
 
 D = joblib.load(os.path.join(prj_folder, db_folder, f'{args.db_name}.joblib'))
 newdb = dict.fromkeys(['train','pred'])
